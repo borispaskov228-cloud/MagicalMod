@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.magicalmod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ServerPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

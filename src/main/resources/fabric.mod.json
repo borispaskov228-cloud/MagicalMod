@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "magicalmod",
+  "version": "${version}",
+  "name": "Magical Mod — жесты и групповая магия",
+  "description": "Магия через последовательности действий (жесты) и групповые ритуалы, где участники отдают ману лидеру.",
+  "authors": [
+    "borispaskov228-cloud"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.magicalmod.MagicalMod"
+    ],
+    "client": [
+      "com.magicalmod.client.MagicalModClient"
+    ]
+  },
+  "mixins": [
+    "magicalmod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
