@@ -15,7 +15,10 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import com.magicalmod.net.ModPayloads.CastFxPayload;
 
 /** Исполнение заклинаний на сервере. */
 public final class SpellCaster {
@@ -73,6 +76,16 @@ public final class SpellCaster {
             ), true);
         }
         ManaManager.sendMana(player);
+
+        // Анимация: размахивание рукой + FX-пакет всем nearby игрокам
+        player.swing(InteractionHand.MAIN_HAND);
+        CastFxPayload fx = new CastFxPayload(spell.id(), empowered,
+                player.getUUID().toString(), hit.x, hit.y, hit.z);
+        for (ServerPlayer viewer : level.getServer().getPlayerList().getPlayers()) {
+            if (viewer.level() == level && viewer.distanceToSqr(hit.x, hit.y, hit.z) < 4096.0D) {
+                ServerPlayNetworking.send(viewer, fx);
+            }
+        }
     }
 
     private static List<LivingEntity> findTargets(ServerPlayer player, ServerLevel level, Vec3 eye, Vec3 look, float range) {
