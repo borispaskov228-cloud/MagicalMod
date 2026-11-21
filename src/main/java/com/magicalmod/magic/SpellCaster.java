@@ -57,19 +57,19 @@ public final class SpellCaster {
 
         float multiplier = empowered ? 1.0F + Math.min(5.0F, pooled / 40.0F) : 1.0F;
         float damage = spell.basePower() * multiplier;
-        float radius = empowered ? 9.0F : 4.0F;
+        float radius = empowered ? 6.0F : 3.0F;
 
         ServerLevel level = player.level();
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1.0F);
 
-        List<LivingEntity> targets = findTargets(player, level, eye, look, empowered ? 30.0F : 20.0F);
+        List<LivingEntity> targets = findTargets(player, level, eye, look, empowered ? 18.0F : 12.0F);
         if (targets.isEmpty() && spell != Spell.HEAL) {
             // Если прицел не попал — берём ближайшего врага рядом, чтобы каст не проваливался
-            targets = findNearest(player, level, empowered ? 12.0F : 8.0F);
+            targets = findNearest(player, level, empowered ? 8.0F : 5.0F);
         }
 
-        Vec3 hit = eye.add(look.scale(empowered ? 14.0 : 10.0));
+        Vec3 hit = eye.add(look.scale(empowered ? 9.0 : 6.0));
         spawnEffect(level, player, spell, hit, empowered, pooled);
 
         if (spell == Spell.HEAL) {
@@ -99,7 +99,7 @@ public final class SpellCaster {
         CastFxPayload fx = new CastFxPayload(spell.id(), empowered,
                 player.getUUID().toString(), hit.x, hit.y, hit.z);
         for (ServerPlayer viewer : level.getServer().getPlayerList().getPlayers()) {
-            if (viewer.level() == level && viewer.distanceToSqr(hit.x, hit.y, hit.z) < 4096.0D) {
+            if (viewer.level() == level && viewer.distanceToSqr(hit.x, hit.y, hit.z) < 1024.0D) {
                 ServerPlayNetworking.send(viewer, fx);
             }
         }
