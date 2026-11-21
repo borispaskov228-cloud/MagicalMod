@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 
-/** Все бинды мода в одном месте; , и . свободны в ванильном игре. */
+/** Все бинды мода в одном месте. */
 public final class ModKeys {
     private ModKeys() {}
 
@@ -23,11 +23,11 @@ public final class ModKeys {
     public static final KeyMapping CAST = KeyBindingHelper.registerKeyBinding(
             new KeyMapping("key.magicalmod.cast", InputConstants.KEY_RBRACKET, CATEGORY));
 
-    /** Шаг жеста «влево» (,). */
+    /** Шаг жеста «влево» (A). */
     public static final KeyMapping GESTURE_LEFT = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping("key.magicalmod.gesture_left", InputConstants.KEY_COMMA, CATEGORY));
+            new KeyMapping("key.magicalmod.gesture_left", InputConstants.KEY_A, CATEGORY));
 
-    /** Шаг жеста «вправо» (.). */
+    /** Шаг жеста «вправо» (D). */
     public static final KeyMapping GESTURE_RIGHT = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping("key.magicalmod.gesture_right", InputConstants.KEY_PERIOD, CATEGORY));
+            new KeyMapping("key.magicalmod.gesture_right", InputConstants.KEY_D, CATEGORY));
 }

@@ -11,8 +11,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * Распознаёт жесты только свободными клавишами: приседание, прыжок, ',' и '.'.
- * Мышь и клавиши движения не используются — прицел и ходьба не сбиваются.
+ * Распознаёт жесты клавишами: приседание, прыжок, A и D.
+ * Мышь не используется. Жест лучше вводить стоя на месте.
  */
 public final class GestureDetector {
     private static final long WINDOW_MS = 12000L;
