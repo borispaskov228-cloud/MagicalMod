@@ -15,6 +15,9 @@ public class MagicalModClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Регистрация биндов должна произойти до инициализации GameOptions
+        ModKeys.init();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) {
                 if (ModKeys.RITUAL.consumeClick()) {

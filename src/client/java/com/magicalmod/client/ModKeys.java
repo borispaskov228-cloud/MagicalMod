@@ -9,6 +9,9 @@ import net.minecraft.client.KeyMapping;
 public final class ModKeys {
     private ModKeys() {}
 
+    /** Вызвать в onInitializeClient ДО создания GameOptions — иначе регистрация биндов упадёт. */
+    public static void init() {}
+
     public static final KeyMapping.Category CATEGORY =
             KeyMapping.Category.register(MagicalMod.id("category"));
 
