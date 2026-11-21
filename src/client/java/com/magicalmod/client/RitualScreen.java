@@ -41,7 +41,10 @@ public class RitualScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics, mouseX, mouseY, delta);
+        // ВАЖНО: super.render() сам рисует фон и делает blur. Повторный вызов
+        // renderBackground() приводит к IllegalStateException "Can only blur once per frame".
+        super.render(graphics, mouseX, mouseY, delta);
+
         graphics.drawCenteredString(this.font, this.title, this.width / 2, 26, 0xFFFFFF);
 
         String[] lines = this.status.split("\n");
@@ -50,8 +53,6 @@ public class RitualScreen extends Screen {
             graphics.drawCenteredString(this.font, Component.literal(line), this.width / 2, lineY, 0xCCCCCC);
             lineY += 12;
         }
-
-        super.render(graphics, mouseX, mouseY, delta);
     }
 
     @Override

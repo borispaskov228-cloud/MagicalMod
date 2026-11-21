@@ -1,5 +1,6 @@
 {
   "key.magicalmod.ritual": "Magic circle (menu)",
+  "key.magicalmod.cast": "Cast spell (gesture)",
   "category.magicalmod": "MagicalMod",
   "key.category.magicalmod.category": "MagicalMod",
   "magicalmod:category": "MagicalMod"

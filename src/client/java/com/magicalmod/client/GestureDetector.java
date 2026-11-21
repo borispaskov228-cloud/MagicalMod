@@ -10,9 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
-/** Распознаёт жесты по действиям игрока: приседание, прыжок, резкий поворот влево/вправо. */
+/** Распознаёт жесты по действиям игрока. Текст не пишется — каст только по отдельной клавише. */
 public final class GestureDetector {
-    private static final long WINDOW_MS = 2500L;
+    private static final long WINDOW_MS = 5000L;
     private static final long TURN_COOLDOWN_MS = 180L;
     private static final float TURN_THRESHOLD = 28.0F;
 
@@ -50,8 +50,8 @@ public final class GestureDetector {
         long now = System.currentTimeMillis();
         if (!SEQUENCE.isEmpty() && now - lastStepMs > WINDOW_MS) SEQUENCE.clear();
 
-        if (crouch && !prevCrouch) add(Gesture.Step.CROUCH, now, client);
-        if (jump && !prevJump) add(Gesture.Step.JUMP, now, client);
+        if (crouch && !prevCrouch) add(Gesture.Step.CROUCH, now);
+        if (jump && !prevJump) add(Gesture.Step.JUMP, now);
 
         float delta = yaw - prevYaw;
         while (delta > 180.0F) delta -= 360.0F;
@@ -62,9 +62,8 @@ public final class GestureDetector {
 
         if (Math.abs(turnAccum) >= TURN_THRESHOLD && now - lastTurnMs > TURN_COOLDOWN_MS) {
             int dir = turnAccum > 0 ? 1 : -1;
-            // повтор того же направления не считаем — нужен именно «взмах» туда-обратно
             if (dir != lastTurnDir || now - lastTurnMs > 400L) {
-                add(dir > 0 ? Gesture.Step.RIGHT : Gesture.Step.LEFT, now, client);
+                add(dir > 0 ? Gesture.Step.RIGHT : Gesture.Step.LEFT, now);
                 lastTurnDir = dir;
                 lastTurnMs = now;
                 turnAccum = 0.0F;
@@ -76,9 +75,14 @@ public final class GestureDetector {
         prevJump = jump;
     }
 
-    private static void add(Gesture.Step step, long now, Minecraft client) {
+    private static void add(Gesture.Step step, long now) {
         SEQUENCE.add(step);
         lastStepMs = now;
+    }
+
+    /** Вызывается по нажатию отдельной клавиши каста. */
+    public static void tryCast(Minecraft client) {
+        if (client.player == null) return;
 
         for (Gesture gesture : Gesture.values()) {
             if (gesture.matches(SEQUENCE)) {
@@ -86,16 +90,15 @@ public final class GestureDetector {
                 turnAccum = 0.0F;
                 ClientPlayNetworking.send(new CastSpellPayload(gesture.spell().id()));
                 client.gui.setOverlayMessage(Component.literal(
-                        "§5✧ Жест распознан: " + gesture.spell().displayName()
+                        "§5✧ " + gesture.spell().displayName()
                 ), false);
                 return;
             }
         }
 
-        StringBuilder sb = new StringBuilder("§7Жест: ");
-        for (Gesture.Step s : SEQUENCE) sb.append(s.symbol()).append(" → ");
-        sb.setLength(Math.max(0, sb.length() - 3));
-        client.gui.setOverlayMessage(Component.literal(sb.toString()), false);
+        SEQUENCE.clear();
+        turnAccum = 0.0F;
+        client.gui.setOverlayMessage(Component.literal("§cЖест не распознан"), false);
     }
 
     private static void resetTracking() {

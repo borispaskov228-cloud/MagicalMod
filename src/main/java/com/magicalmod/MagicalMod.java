@@ -7,6 +7,7 @@ import com.magicalmod.net.ModPayloads;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,10 @@ public class MagicalMod implements ModInitializer {
             ManaManager.tick(server);
             RitualManager.tick(server);
         });
+
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+                ManaManager.sendToClient(handler.getPlayer())
+        );
     }
 
     public static Identifier id(String path) {

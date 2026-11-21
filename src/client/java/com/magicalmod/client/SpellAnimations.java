@@ -22,6 +22,8 @@ public final class SpellAnimations {
         Spell spell = Spell.byId(payload.spellId());
         if (spell == null) return;
 
+        // не копим частицы бесконечно
+        if (EFFECTS.size() >= 8) EFFECTS.remove(0);
         EFFECTS.add(new Effect(spell.color(), payload.empowered(),
                 payload.x(), payload.y(), payload.z(),
                 payload.empowered() ? 90 : 45));
@@ -57,8 +59,7 @@ public final class SpellAnimations {
             double pz = e.z + Math.sin(angle) * radius;
             double py = e.y + Math.sin(angle * 2.0D + e.age * 0.18D) * 0.7D;
 
-            level.addParticle(new DustParticleOptions(e.color, e.empowered ? 1.5F : 1.0F),
-                    px, py, pz, 0.0D, 0.015D, 0.0D);
+            level.addParticle(e.options, px, py, pz, 0.0D, 0.015D, 0.0D);
 
             if (e.empowered) {
                 level.addParticle(ParticleTypes.END_ROD, px, py, pz, 0.0D, 0.01D, 0.0D);
@@ -74,15 +75,15 @@ public final class SpellAnimations {
     }
 
     private static final class Effect {
-        final int color;
         final boolean empowered;
+        final DustParticleOptions options;
         final double x, y, z;
         final int duration;
         int age = 0;
 
         Effect(int color, boolean empowered, double x, double y, double z, int duration) {
-            this.color = color;
             this.empowered = empowered;
+            this.options = new DustParticleOptions(color, empowered ? 1.5F : 1.0F);
             this.x = x;
             this.y = y;
             this.z = z;

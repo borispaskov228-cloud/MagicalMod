@@ -14,8 +14,9 @@ public final class RitualManager {
     private RitualManager() {}
 
     private static final Map<UUID, RitualCircle> CIRCLES = new HashMap<>();
+    private static int tickCounter = 0;
 
-    public static void reset() { CIRCLES.clear(); }
+    public static void reset() { CIRCLES.clear(); tickCounter = 0; }
 
     public static RitualCircle start(ServerPlayer leader) {
         RitualCircle circle = new RitualCircle(leader);
@@ -60,6 +61,9 @@ public final class RitualManager {
 
     /** Удаляет просроченные круги. */
     public static void tick(MinecraftServer server) {
+        if (CIRCLES.isEmpty() || ++tickCounter < 20) return;
+        tickCounter = 0;
+
         List<UUID> expired = new ArrayList<>();
         for (Map.Entry<UUID, RitualCircle> e : CIRCLES.entrySet()) {
             if (e.getValue().expired()) expired.add(e.getKey());

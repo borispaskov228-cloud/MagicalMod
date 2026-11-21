@@ -21,6 +21,7 @@ public final class ModPayloads {
         // S2C
         PayloadTypeRegistry.playS2C().register(RitualStatusPayload.TYPE, RitualStatusPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(CastFxPayload.TYPE, CastFxPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ManaUpdatePayload.TYPE, ManaUpdatePayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(CastSpellPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
@@ -74,6 +75,17 @@ public final class ModPayloads {
                         ByteBufCodecs.DOUBLE, CastFxPayload::z,
                         CastFxPayload::new
                 ).cast();
+
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Текущая мана для HUD-полосы. */
+    public record ManaUpdatePayload(float mana) implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<ManaUpdatePayload> TYPE =
+                new CustomPacketPayload.Type<>(MagicalMod.id("mana_update"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, ManaUpdatePayload> CODEC =
+                ByteBufCodecs.FLOAT.map(ManaUpdatePayload::new, ManaUpdatePayload::mana).cast();
 
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }
