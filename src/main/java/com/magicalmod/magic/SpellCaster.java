@@ -57,12 +57,21 @@ public final class SpellCaster {
         Vec3 look = player.getViewVector(1.0F);
 
         List<LivingEntity> targets = findTargets(player, level, eye, look, empowered ? 30.0F : 20.0F);
+        if (targets.isEmpty() && spell != Spell.HEAL) {
+            // Если прицел не попал — берём ближайшего врага рядом, чтобы каст не проваливался
+            targets = findNearest(player, level, empowered ? 12.0F : 8.0F);
+        }
 
         Vec3 hit = eye.add(look.scale(empowered ? 14.0 : 10.0));
         spawnEffect(level, player, spell, hit, empowered, pooled);
 
-        for (LivingEntity target : targets) {
-            applyEffect(player, level, spell, target, damage, radius, empowered);
+        if (spell == Spell.HEAL) {
+            // Исцеление всегда действует на самого кастера, даже если вокруг нет целей
+            applyHeal(player, damage, empowered);
+        } else {
+            for (LivingEntity target : targets) {
+                applyEffect(player, level, spell, target, damage, radius, empowered);
+            }
         }
 
         if (empowered) {
@@ -100,18 +109,53 @@ public final class SpellCaster {
         return result;
     }
 
+    private static List<LivingEntity> findNearest(ServerPlayer player, ServerLevel level, float range) {
+        LivingEntity best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Entity entity : level.getEntities(player, player.getBoundingBox().inflate(range),
+                e -> e != player && e instanceof LivingEntity)) {
+            double d = player.distanceToSqr(entity);
+            if (d < bestDist) { bestDist = d; best = (LivingEntity) entity; }
+        }
+        List<LivingEntity> result = new ArrayList<>();
+        if (best != null) result.add(best);
+        return result;
+    }
+
+    private static void applyHeal(ServerPlayer caster, float amount, boolean empowered) {
+        float missing = caster.getMaxHealth() - caster.getHealth();
+        if (missing > 0.0F) caster.heal(Math.min(amount, missing));
+        caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION,
+                empowered ? 160 : 60, empowered ? 2 : 0));
+        caster.level().sendParticles(net.minecraft.core.particles.ParticleTypes.HEART,
+                caster.getX(), caster.getY() + 1.0D, caster.getZ(),
+                empowered ? 30 : 12, 0.4D, 0.6D, 0.4D, 0.05D);
+    }
+
     private static void applyEffect(ServerPlayer caster, ServerLevel level, Spell spell,
                                     LivingEntity target, float damage, float radius, boolean empowered) {
         switch (spell) {
-            case HEAL -> {
-                caster.heal(Math.min(damage, caster.getMaxHealth() - caster.getHealth()));
-                caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION, empowered ? 160 : 60, empowered ? 2 : 0));
-            }
+            case HEAL -> applyHeal(caster, damage, empowered);
             case FROST -> {
                 target.hurtServer(level, caster.damageSources().magic(), damage);
-                target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, empowered ? 200 : 100, empowered ? 2 : 0));
+                target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
+                        empowered ? 240 : 140, empowered ? 4 : 2));
+                // Полная заморозка: враг не двигается и получает урон от холода
+                if (target.canFreeze()) {
+                    target.setTicksFrozen(target.getTicksRequiredToFreeze() + (empowered ? 160 : 60));
+                }
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.SNOWFLAKE,
+                        target.getX(), target.getY() + 1.0D, target.getZ(),
+                        empowered ? 50 : 24, 0.6D, 0.9D, 0.6D, 0.05D);
             }
-            case FIREBALL -> target.hurtServer(level, caster.damageSources().magic(), damage);
+            case FIREBALL -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                // Поджог: 5 секунд обычным заклинанием, 10 — групповым
+                target.igniteForSeconds(empowered ? 10.0F : 5.0F);
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                        target.getX(), target.getY() + 0.8D, target.getZ(),
+                        empowered ? 60 : 26, 0.5D, 0.8D, 0.5D, 0.06D);
+            }
             case LIGHTNING -> {
                 target.hurtServer(level, caster.damageSources().lightningBolt(), damage);
                 target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1));

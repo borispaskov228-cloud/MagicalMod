@@ -1,6 +1,7 @@
 package com.magicalmod.command;
 
 import com.magicalmod.magic.Gesture;
+import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.ManaManager;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -23,6 +24,7 @@ public final class MagicCommands {
             dispatcher.register(Commands.literal("magic")
                     .then(Commands.literal("mana").executes(MagicCommands::mana))
                     .then(Commands.literal("gestures").executes(MagicCommands::gestures))
+                    .then(Commands.literal("book").executes(MagicCommands::book))
                     .executes(MagicCommands::help)
             );
         });
@@ -35,13 +37,18 @@ public final class MagicCommands {
 
     private static int help(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSystemMessage(Component.literal(
-                "§6Магия §f— /magic mana | /magic gestures. Меню круга: клавиша §6G"
+                "§6Магия §f— /magic mana | /magic gestures | /magic book. Меню круга: §6G"
         ));
         return 1;
     }
 
     private static int mana(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ManaManager.sendMana(player(ctx));
+        return 1;
+    }
+
+    private static int book(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        GuideBook.give(player(ctx));
         return 1;
     }
 
