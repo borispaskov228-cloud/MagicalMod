@@ -56,6 +56,6 @@ public final class ManaHud {
 
         graphics.drawString(client.font,
                 "MANA " + Math.round(mana) + "/" + Math.round(maxMana) + "  Lv" + level,
-                x, y - 10, 0xD9A6FF);
+                x, y - 10, 0xFFD9A6FF);
     }
 }
