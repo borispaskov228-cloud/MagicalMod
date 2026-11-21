@@ -2,6 +2,7 @@ package com.magicalmod;
 
 import com.magicalmod.command.MagicCommands;
 import com.magicalmod.magic.GuideBook;
+import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.RitualManager;
@@ -34,6 +35,7 @@ public class MagicalMod implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             ManaManager.tick(server);
             RitualManager.tick(server);
+            MagicProjectiles.tick(server);
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {

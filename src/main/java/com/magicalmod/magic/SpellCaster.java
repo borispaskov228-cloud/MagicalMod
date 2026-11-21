@@ -62,24 +62,13 @@ public final class SpellCaster {
         ServerLevel level = player.level();
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1.0F);
-
-        List<LivingEntity> targets = findTargets(player, level, eye, look, empowered ? 18.0F : 12.0F);
-        if (targets.isEmpty() && spell != Spell.HEAL) {
-            // Если прицел не попал — берём ближайшего врага рядом, чтобы каст не проваливался
-            targets = findNearest(player, level, empowered ? 8.0F : 5.0F);
-        }
-
         Vec3 hit = eye.add(look.scale(empowered ? 9.0 : 6.0));
-        spawnEffect(level, player, spell, hit, empowered, pooled);
 
-        if (spell == Spell.HEAL) {
-            // Исцеление всегда действует на самого кастера, даже если вокруг нет целей
-            applyHeal(player, damage, empowered);
-        } else {
-            for (LivingEntity target : targets) {
-                applyEffect(player, level, spell, target, damage, radius, empowered);
-            }
-        }
+        // Магия летит зарядом; эффект применяется только при попадании
+        float range = spell == Spell.HEAL ? 6.0F : (empowered ? 18.0F : 12.0F);
+        MagicProjectiles.spawn(player, spell, eye.add(look.scale(0.6D)), look,
+                empowered, damage, radius, range);
+        spawnEffect(level, player, spell, eye, empowered, pooled);
 
         if (empowered) {
             RitualManager.notifyNear(player, Component.literal(
@@ -105,32 +94,7 @@ public final class SpellCaster {
         }
     }
 
-    private static List<LivingEntity> findTargets(ServerPlayer player, ServerLevel level, Vec3 eye, Vec3 look, float range) {
-        List<LivingEntity> result = new ArrayList<>();
-        var box = player.getBoundingBox().inflate(range);
-        for (Entity entity : level.getEntities(player, box, e -> e != player && e instanceof LivingEntity)) {
-            Vec3 to = entity.getEyePosition().subtract(eye);
-            if (to.length() > range) continue;
-            if (to.normalize().dot(look) < 0.80D) continue;
-            result.add((LivingEntity) entity);
-        }
-        return result;
-    }
-
-    private static List<LivingEntity> findNearest(ServerPlayer player, ServerLevel level, float range) {
-        LivingEntity best = null;
-        double bestDist = Double.MAX_VALUE;
-        for (Entity entity : level.getEntities(player, player.getBoundingBox().inflate(range),
-                e -> e != player && e instanceof LivingEntity)) {
-            double d = player.distanceToSqr(entity);
-            if (d < bestDist) { bestDist = d; best = (LivingEntity) entity; }
-        }
-        List<LivingEntity> result = new ArrayList<>();
-        if (best != null) result.add(best);
-        return result;
-    }
-
-    private static void applyHeal(ServerPlayer caster, float amount, boolean empowered) {
+    public static void applyHeal(ServerPlayer caster, float amount, boolean empowered) {
         float missing = caster.getMaxHealth() - caster.getHealth();
         if (missing > 0.0F) caster.heal(Math.min(amount, missing));
         caster.addEffect(new MobEffectInstance(MobEffects.REGENERATION,
@@ -140,7 +104,7 @@ public final class SpellCaster {
                 empowered ? 30 : 12, 0.4D, 0.6D, 0.4D, 0.05D);
     }
 
-    private static void applyEffect(ServerPlayer caster, ServerLevel level, Spell spell,
+    public static void applyEffect(ServerPlayer caster, ServerLevel level, Spell spell,
                                     LivingEntity target, float damage, float radius, boolean empowered) {
         switch (spell) {
             case HEAL -> applyHeal(caster, damage, empowered);

@@ -79,12 +79,12 @@ public final class ManaManager {
         sendToClient(player);
     }
 
-    /** +1 мана в секунду каждому игроку. */
+    /** +3 маны в секунду каждому игроку. */
     public static void tick(MinecraftServer server) {
         if (++regenCounter < 20) return;
         regenCounter = 0;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (get(player) < getMax(player)) add(player, 1.0F);
+            if (get(player) < getMax(player)) add(player, 3.0F);
         }
     }
 
