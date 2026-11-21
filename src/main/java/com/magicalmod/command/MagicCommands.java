@@ -1,5 +1,6 @@
 package com.magicalmod.command;
 
+import com.magicalmod.artifact.Artifacts;
 import com.magicalmod.magic.Gesture;
 import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.ManaManager;
@@ -11,6 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 
 /** Остались только справочные команды — групповой магией теперь управляет меню (G). */
 public final class MagicCommands {
@@ -25,6 +27,7 @@ public final class MagicCommands {
                     .then(Commands.literal("mana").executes(MagicCommands::mana))
                     .then(Commands.literal("gestures").executes(MagicCommands::gestures))
                     .then(Commands.literal("book").executes(MagicCommands::book))
+                    .then(Commands.literal("artifacts").executes(MagicCommands::artifacts))
                     .executes(MagicCommands::help)
             );
         });
@@ -37,13 +40,22 @@ public final class MagicCommands {
 
     private static int help(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSystemMessage(Component.literal(
-                "§6Магия §f— /magic mana | /magic gestures | /magic book. Меню круга: §6G"
+                "§6Магия §f— /magic mana | /magic gestures | /magic book | /magic artifacts. Меню круга: §6G"
         ));
         return 1;
     }
 
     private static int mana(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ManaManager.sendMana(player(ctx));
+        return 1;
+    }
+
+    private static int artifacts(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = player(ctx);
+        for (ItemStack stack : Artifacts.createAll()) {
+            if (!p.getInventory().add(stack)) p.drop(stack, false);
+        }
+        ctx.getSource().sendSystemMessage(Component.literal("§6Выдано 20 артефактов"));
         return 1;
     }
 
