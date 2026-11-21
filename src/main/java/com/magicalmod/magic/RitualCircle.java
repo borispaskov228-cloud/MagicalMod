@@ -31,6 +31,9 @@ public final class RitualCircle {
 
     public UUID leader() { return leader; }
     public ResourceKey<Level> dimension() { return dimension; }
+    public double x() { return x; }
+    public double y() { return y; }
+    public double z() { return z; }
     public float pool() { return pool; }
     public int contributorCount() { return contributions.size(); }
 
