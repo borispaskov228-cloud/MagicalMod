@@ -18,6 +18,7 @@ public final class GestureDetector {
 
     private static final List<Gesture.Step> SEQUENCE = new ArrayList<>();
     private static long lastStepMs = 0L;
+    private static long lastCastMs = 0L;
     private static long lastTurnMs = 0L;
     private static int lastTurnDir = 0;
     private static float turnAccum = 0.0F;
@@ -82,7 +83,10 @@ public final class GestureDetector {
 
     /** Вызывается по нажатию отдельной клавиши каста. */
     public static void tryCast(Minecraft client) {
-        if (client.player == null) return;
+        if (client.player == null || client.screen != null) return;
+        long now = System.currentTimeMillis();
+        if (now - lastCastMs < 500L) return;
+        lastCastMs = now;
 
         for (Gesture gesture : Gesture.values()) {
             if (gesture.matches(SEQUENCE)) {

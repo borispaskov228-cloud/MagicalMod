@@ -44,8 +44,8 @@ public final class SpellAnimations {
         while (it.hasNext()) {
             Effect e = it.next();
             e.age++;
-            spawn(level, e);
-            if (e.age >= e.duration) it.remove();
+            if (e.age < e.duration) spawn(level, e);
+            else it.remove();
         }
     }
 

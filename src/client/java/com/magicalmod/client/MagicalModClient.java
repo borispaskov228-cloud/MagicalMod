@@ -52,6 +52,6 @@ public class MagicalModClient implements ClientModInitializer {
         );
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ManaHud.ID, ManaHud::render);
-        HudStatusBarHeightRegistry.addRight(ManaHud.ID, player -> 10);
+        HudStatusBarHeightRegistry.addRight(ManaHud.ID, player -> ManaHud.isVisible() ? 10 : 0);
     }
 }

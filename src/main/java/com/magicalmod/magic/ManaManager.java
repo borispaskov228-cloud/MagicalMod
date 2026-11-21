@@ -25,6 +25,11 @@ public final class ManaManager {
         if (Math.abs(old - clamped) > 0.001F) sendToClient(player, clamped);
     }
 
+    /** Копирование маны при респавне — пакет отправит AFTER_RESPAWN. */
+    public static void setSilent(ServerPlayer player, float value) {
+        ((ManaHolder) player).magicalmod$setMana(Math.max(0.0F, Math.min(ManaHolder.MAX_MANA, value)));
+    }
+
     /** Списывает ману. Возвращает false, если её не хватило. */
     public static boolean consume(ServerPlayer player, float amount) {
         float current = get(player);

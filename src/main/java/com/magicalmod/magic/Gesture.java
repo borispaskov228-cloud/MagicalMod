@@ -42,10 +42,10 @@ public enum Gesture {
 
     /** Совпадает ли конец введённой последовательности с этим жестом. */
     public boolean matches(java.util.List<Step> input) {
-        if (input.size() < steps.length) return false;
-        int offset = input.size() - steps.length;
+        // Точное совпадение: иначе короткая последовательность совпала бы как суффикс длинной
+        if (input.size() != steps.length) return false;
         for (int i = 0; i < steps.length; i++) {
-            if (input.get(offset + i) != steps[i]) return false;
+            if (input.get(i) != steps[i]) return false;
         }
         return true;
     }

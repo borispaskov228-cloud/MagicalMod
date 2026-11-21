@@ -6,6 +6,7 @@ import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.resources.Identifier;
@@ -35,6 +36,14 @@ public class MagicalMod implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 ManaManager.sendToClient(handler.getPlayer())
+        );
+
+        // При респавне сервер создаёт нового ServerPlayer — переносим ману и синхронизируем HUD
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
+                ManaManager.setSilent(newPlayer, ManaManager.get(oldPlayer))
+        );
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
+                ManaManager.sendToClient(newPlayer)
         );
     }
 
