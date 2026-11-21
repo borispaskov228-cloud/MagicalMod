@@ -11,8 +11,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 /**
- * Распознаёт жесты только клавиатурой: приседание, прыжок, A/D.
- * Мышь не используется — прицел не сбивается.
+ * Распознаёт жесты только свободными клавишами: приседание, прыжок, ',' и '.'.
+ * Мышь и клавиши движения не используются — прицел и ходьба не сбиваются.
  */
 public final class GestureDetector {
     private static final long WINDOW_MS = 5000L;
@@ -38,8 +38,8 @@ public final class GestureDetector {
 
         boolean crouch = player.isCrouching();
         boolean jump = player.input.keyPresses.jump();
-        boolean left = client.options.keyLeft.isDown();
-        boolean right = client.options.keyRight.isDown();
+        boolean left = ModKeys.GESTURE_LEFT.isDown();
+        boolean right = ModKeys.GESTURE_RIGHT.isDown();
 
         if (!initialized) {
             initialized = true;

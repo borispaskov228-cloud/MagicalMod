@@ -14,8 +14,8 @@ public enum Gesture {
             return switch (this) {
                 case CROUCH -> "присесть";
                 case JUMP -> "прыжок";
-                case LEFT -> "влево";
-                case RIGHT -> "вправо";
+                case LEFT -> ", (влево)";
+                case RIGHT -> ". (вправо)";
             };
         }
     }

@@ -24,7 +24,14 @@ import com.magicalmod.net.ModPayloads.CastFxPayload;
 public final class SpellCaster {
     private SpellCaster() {}
 
+    private static final java.util.Map<java.util.UUID, Long> LAST_CAST = new java.util.HashMap<>();
+
     public static void handle(ServerPlayer player, String spellId) {
+        long now = System.currentTimeMillis();
+        Long last = LAST_CAST.get(player.getUUID());
+        if (last != null && now - last < 250L) return;
+        LAST_CAST.put(player.getUUID(), now);
+
         Spell spell = Spell.byId(spellId);
         if (spell == null) {
             MagicalModHolder.LOGGER.warn("Неизвестное заклинание: {}", spellId);
@@ -75,7 +82,7 @@ public final class SpellCaster {
         }
 
         if (empowered) {
-            RitualManager.notifyEveryone(player, Component.literal(
+            RitualManager.notifyNear(player, Component.literal(
                     "§6✦ ГРУППОВОЕ ЗАКЛИНАНИЕ §f" + spell.displayName()
                             + " §7(сила ×" + String.format("%.1f", multiplier) + ")"
             ));

@@ -32,6 +32,7 @@ public final class ManaManager {
 
     /** Списывает ману. Возвращает false, если её не хватило. */
     public static boolean consume(ServerPlayer player, float amount) {
+        if (amount < 0.0F) return false;
         float current = get(player);
         if (current < amount) return false;
         set(player, current - amount);
@@ -39,6 +40,7 @@ public final class ManaManager {
     }
 
     public static void add(ServerPlayer player, float amount) {
+        if (amount <= 0.0F) return;
         set(player, get(player) + amount);
     }
 

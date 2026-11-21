@@ -1,61 +1,75 @@
 package com.magicalmod.magic;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
-/** Круг групповой магии: лидер и участники, отдавшие ману в общий резервуар. */
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+
+/** Круг групповой магии: лидер, участники и общий резервуар маны. */
 public final class RitualCircle {
     public static final float RADIUS = 16.0F;
     public static final long LIFETIME_MS = 5L * 60L * 1000L;
 
     private final UUID leader;
+    private final ResourceKey<Level> dimension;
     private final double x, y, z;
-    private final Set<UUID> contributors = new HashSet<>();
+    private final Map<UUID, Float> contributions = new HashMap<>();
     private final long createdAt = System.currentTimeMillis();
     private float pool;
 
-    public RitualCircle(net.minecraft.server.level.ServerPlayer leader) {
+    public RitualCircle(ServerPlayer leader) {
         this.leader = leader.getUUID();
+        this.dimension = leader.level().dimension();
         this.x = leader.getX();
         this.y = leader.getY();
         this.z = leader.getZ();
     }
 
     public UUID leader() { return leader; }
+    public ResourceKey<Level> dimension() { return dimension; }
     public float pool() { return pool; }
-    public int contributorCount() { return contributors.size(); }
+    public int contributorCount() { return contributions.size(); }
 
-    public boolean isContributor(UUID uuid) { return contributors.contains(uuid); }
+    public boolean isContributor(UUID uuid) { return contributions.containsKey(uuid); }
 
     public void addContribution(UUID uuid, float mana) {
-        contributors.add(uuid);
+        contributions.merge(uuid, mana, Float::sum);
         pool += mana;
     }
 
-    public boolean removeContributor(UUID uuid) { return contributors.remove(uuid); }
+    /** Выход участника: его мана возвращается в пул круга (не игроку). */
+    public boolean removeContributor(UUID uuid) {
+        Float value = contributions.remove(uuid);
+        if (value == null) return false;
+        pool = Math.max(0.0F, pool - value);
+        return true;
+    }
 
-    /** Забирает всю ману круга (используется при усиленном заклинании). */
+    /** Забирает всю ману круга и очищает список участников. */
     public float drainPool() {
         float value = pool;
         pool = 0.0F;
+        contributions.clear();
         return value;
     }
 
     /** Возвращает ману участникам при отмене круга. */
-    public void refund(net.minecraft.server.MinecraftServer server) {
-        if (contributors.isEmpty()) return;
-        float share = pool / contributors.size();
-        for (UUID id : contributors) {
-            net.minecraft.server.level.ServerPlayer p = server.getPlayerList().getPlayer(id);
-            if (p != null) ManaManager.add(p, share);
+    public void refund(MinecraftServer server) {
+        for (Map.Entry<UUID, Float> entry : contributions.entrySet()) {
+            ServerPlayer p = server.getPlayerList().getPlayer(entry.getKey());
+            if (p != null) ManaManager.add(p, entry.getValue());
         }
         pool = 0.0F;
+        contributions.clear();
     }
 
-    public boolean contains(net.minecraft.server.level.ServerPlayer player) {
-        if (player.distanceToSqr(x, y, z) > RADIUS * RADIUS) return false;
-        return true;
+    public boolean contains(ServerPlayer player) {
+        if (!player.level().dimension().equals(dimension)) return false;
+        return player.distanceToSqr(x, y, z) <= RADIUS * RADIUS;
     }
 
     public boolean expired() {

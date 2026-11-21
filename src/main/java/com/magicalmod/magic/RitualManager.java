@@ -19,6 +19,8 @@ public final class RitualManager {
     public static void reset() { CIRCLES.clear(); tickCounter = 0; }
 
     public static RitualCircle start(ServerPlayer leader) {
+        RitualCircle old = CIRCLES.remove(leader.getUUID());
+        if (old != null) old.refund(leader.level().getServer());
         RitualCircle circle = new RitualCircle(leader);
         CIRCLES.put(leader.getUUID(), circle);
         return circle;
@@ -28,7 +30,7 @@ public final class RitualManager {
 
     public static java.util.Collection<RitualCircle> all() { return CIRCLES.values(); }
 
-    /** Убирает игрока из круга (без возврата маны). */
+    /** Убирает игрока из круга (его взнос остаётся в пуле). */
     public static boolean leave(ServerPlayer player) {
         for (RitualCircle circle : CIRCLES.values()) {
             if (circle.removeContributor(player.getUUID())) return true;
@@ -41,11 +43,12 @@ public final class RitualManager {
         if (circle != null) circle.refund(leader.level().getServer());
     }
 
-    /** Ближайший круг, в радиусе которого находится игрок. */
+    /** Ближайший круг в том же измерении. */
     public static RitualCircle nearest(ServerPlayer player) {
         RitualCircle best = null;
         double bestDist = Double.MAX_VALUE;
         for (RitualCircle circle : CIRCLES.values()) {
+            if (!circle.dimension().equals(player.level().dimension())) continue;
             ServerPlayer leader = player.level().getServer().getPlayerList().getPlayer(circle.leader());
             if (leader == null || !circle.contains(player)) continue;
             double d = player.distanceToSqr(leader.getX(), leader.getY(), leader.getZ());
@@ -54,12 +57,18 @@ public final class RitualManager {
         return best;
     }
 
-    /** Усиливает лидера: возвращает-circle, если круг активен. */
     public static RitualCircle circleForLeader(ServerPlayer player) {
         return CIRCLES.get(player.getUUID());
     }
 
-    /** Удаляет просроченные круги. */
+    /** Игрок вышел из сети — убираем его из кругов, а его круг расформировываем. */
+    public static void onDisconnect(ServerPlayer player) {
+        leave(player);
+        RitualCircle own = CIRCLES.remove(player.getUUID());
+        if (own != null) own.refund(player.level().getServer());
+    }
+
+    /** Удаляет просроченные круги раз в секунду. */
     public static void tick(MinecraftServer server) {
         if (CIRCLES.isEmpty() || ++tickCounter < 20) return;
         tickCounter = 0;
@@ -74,9 +83,13 @@ public final class RitualManager {
         }
     }
 
-    public static void notifyEveryone(ServerPlayer source, Component message) {
+    /** Оповещение только игроков рядом и в том же измерении. */
+    public static void notifyNear(ServerPlayer source, Component message) {
         for (ServerPlayer player : source.level().getServer().getPlayerList().getPlayers()) {
-            player.displayClientMessage(message, false);
+            if (player.level().dimension().equals(source.level().dimension())
+                    && player.distanceToSqr(source) < 64.0D * 64.0D) {
+                player.displayClientMessage(message, false);
+            }
         }
     }
 }

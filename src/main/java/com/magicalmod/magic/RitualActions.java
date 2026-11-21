@@ -7,7 +7,14 @@ import net.minecraft.server.level.ServerPlayer;
 public final class RitualActions {
     private RitualActions() {}
 
+    private static final java.util.Map<java.util.UUID, Long> LAST_ACTION = new java.util.HashMap<>();
+
     public static String handle(ServerPlayer player, String action) {
+        long now = System.currentTimeMillis();
+        Long last = LAST_ACTION.get(player.getUUID());
+        if (last != null && now - last < 200L) return "§cСлишком быстро";
+        LAST_ACTION.put(player.getUUID(), now);
+
         return switch (action) {
             case "open" -> status(player);
             case "start" -> start(player);
@@ -38,7 +45,7 @@ public final class RitualActions {
     private static String start(ServerPlayer player) {
         if (RitualManager.get(player.getUUID()) != null) return "§cУ вас уже есть круг";
         RitualManager.start(player);
-        RitualManager.notifyEveryone(player, Component.literal(
+        RitualManager.notifyNear(player, Component.literal(
                 "§a" + player.getName().getString() + " §fсоздал круг групповой магии!"
         ));
         player.displayClientMessage(Component.literal(
@@ -58,7 +65,7 @@ public final class RitualActions {
 
         circle.addContribution(player.getUUID(), mana);
         ManaManager.set(player, 0.0F);
-        RitualManager.notifyEveryone(player, Component.literal(
+        RitualManager.notifyNear(player, Component.literal(
                 "§a" + player.getName().getString() + " §fотдал " + Math.round(mana)
                         + " маны в круг. Всего: §6" + Math.round(circle.pool())
         ));

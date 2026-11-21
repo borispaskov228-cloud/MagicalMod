@@ -39,6 +39,9 @@ public class MagicalMod implements ModInitializer {
             ManaManager.sendToClient(handler.getPlayer());
             GuideBook.give(handler.getPlayer());
         });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            if (handler.getPlayer() != null) RitualManager.onDisconnect(handler.getPlayer());
+        });
 
         // При респавне сервер создаёт нового ServerPlayer — переносим ману и синхронизируем HUD
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
