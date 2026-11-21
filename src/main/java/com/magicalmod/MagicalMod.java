@@ -2,6 +2,7 @@ package com.magicalmod;
 
 import com.magicalmod.command.MagicCommands;
 import com.magicalmod.magic.GuideBook;
+import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
@@ -44,9 +45,13 @@ public class MagicalMod implements ModInitializer {
         });
 
         // При респавне сервер создаёт нового ServerPlayer — переносим ману и синхронизируем HUD
-        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) ->
-                ManaManager.setSilent(newPlayer, ManaManager.get(oldPlayer))
-        );
+        ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+            ManaHolder from = (ManaHolder) oldPlayer;
+            ManaHolder to = (ManaHolder) newPlayer;
+            to.magicalmod$setManaLevel(from.magicalmod$getManaLevel());
+            to.magicalmod$setManaXp(from.magicalmod$getManaXp());
+            ManaManager.setSilent(newPlayer, ManaManager.get(oldPlayer));
+        });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
                 ManaManager.sendToClient(newPlayer)
         );

@@ -92,6 +92,7 @@ public final class SpellCaster {
             ), true);
         }
         ManaManager.sendMana(player);
+        ManaManager.awardXp(player, empowered ? 4 : 2);
 
         // Анимация: размахивание рукой + FX-пакет всем nearby игрокам
         player.swing(InteractionHand.MAIN_HAND);
@@ -181,46 +182,46 @@ public final class SpellCaster {
     private static void spawnEffect(ServerLevel level, ServerPlayer caster, Spell spell,
                                     Vec3 hit, boolean empowered, float pooled) {
         double x = hit.x, y = hit.y, z = hit.z;
-        int color = spell.color();
+        int k = empowered ? 2 : 1;
 
-        if (spell == Spell.HEAL && !empowered) {
-            level.sendParticles(ParticleTypes.HEART, caster.getX(), caster.getY() + 1.0, caster.getZ(),
-                    18, 0.4, 0.6, 0.4, 0.05);
-        } else {
-            level.sendParticles(ParticleTypes.FLAME, x, y, z, empowered ? 90 : 30,
-                    empowered ? 2.0 : 0.6, empowered ? 2.0 : 0.6, empowered ? 2.0 : 0.6, 0.08);
+        // У каждого заклинания свой набор частиц — цвет один, а картинка разная
+        switch (spell) {
+            case FIREBALL -> {
+                level.sendParticles(ParticleTypes.FLAME, x, y, z, 60 * k, 1.4, 1.8, 1.4, 0.12);
+                level.sendParticles(ParticleTypes.SMALL_FLAME, x, y + 0.5D, z, 30 * k, 1.0, 1.0, 1.0, 0.08);
+                level.sendParticles(ParticleTypes.SMOKE, x, y + 1.0D, z, 24 * k, 0.8, 1.2, 0.8, 0.03);
+                play(level, SoundEvents.FIRECHARGE_USE, x, y, z, 1.0F, 1.0F);
+                play(level, SoundEvents.BLAZE_SHOOT, x, y, z, 0.6F, 0.8F);
+            }
+            case FROST -> {
+                level.sendParticles(ParticleTypes.SNOWFLAKE, x, y, z, 70 * k, 2.0, 1.4, 2.0, 0.04);
+                level.sendParticles(ParticleTypes.CLOUD, x, y, z, 22 * k, 1.5, 1.0, 1.5, 0.02);
+                level.sendParticles(new DustParticleOptions(0xAAEEFF, 1.2F), x, y, z, 40 * k, 2.0, 1.0, 2.0, 0.03);
+                play(level, SoundEvents.GLASS_BREAK, x, y, z, 0.9F, 1.2F);
+            }
+            case HEAL -> {
+                double hx = caster.getX(), hy = caster.getY(), hz = caster.getZ();
+                level.sendParticles(ParticleTypes.HEART, hx, hy + 0.5D, hz, 20 * k, 0.5, 1.2, 0.5, 0.04);
+                level.sendParticles(ParticleTypes.GLOW, hx, hy + 1.0D, hz, 24 * k, 0.8, 1.2, 0.8, 0.03);
+                level.sendParticles(new DustParticleOptions(0x77FFAA, 1.0F), hx, hy + 0.5D, hz,
+                        40 * k, 0.9, 1.0, 0.9, 0.04);
+                play(level, SoundEvents.TOTEM_USE, x, y, z, 0.8F, 1.0F);
+            }
+            case LIGHTNING -> {
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 60 * k, 1.2, 2.0, 1.2, 0.2);
+                level.sendParticles(ParticleTypes.END_ROD, x, y, z, 24 * k, 0.8, 1.5, 0.8, 0.15);
+                level.sendParticles(ParticleTypes.GLOW, x, y, z, 20 * k, 1.0, 1.0, 1.0, 0.05);
+                play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.4F, 1.6F);
+            }
         }
 
         if (empowered) {
-            // Совершенно другой визуал: цветная сфера, души огонь, концы и свечение
-            level.sendParticles(new DustParticleOptions(color, 1.6F), x, y, z, 160,
+            level.sendParticles(new DustParticleOptions(spell.color(), 1.6F), x, y, z, 160,
                     3.5, 3.5, 3.5, 0.25);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 70,
-                    2.5, 2.5, 2.5, 0.12);
-            level.sendParticles(ParticleTypes.END_ROD, x, y, z, 60,
-                    2.0, 2.0, 2.0, 0.15);
-            level.sendParticles(ParticleTypes.GLOW, x, y, z, 40,
-                    2.0, 2.0, 2.0, 0.05);
-            level.sendParticles(ParticleTypes.EXPLOSION, x, y, z, 3,
-                    0.4, 0.4, 0.4, 0.0);
-            play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.8F, 0.6F);
+            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 70, 2.5, 2.5, 2.5, 0.12);
+            level.sendParticles(ParticleTypes.EXPLOSION, x, y, z, 3, 0.4, 0.4, 0.4, 0.0);
             play(level, SoundEvents.BEACON_ACTIVATE, x, y, z, 1.0F, 1.2F);
-        } else {
-            switch (spell) {
-                case FIREBALL -> {
-                    level.sendParticles(ParticleTypes.SMOKE, x, y, z, 20, 0.5, 0.5, 0.5, 0.03);
-                    play(level, SoundEvents.FIRECHARGE_USE, x, y, z, 1.0F, 1.0F);
-                }
-                case FROST -> {
-                    level.sendParticles(new DustParticleOptions(color, 1.0F), x, y, z, 45, 1.0, 1.0, 1.0, 0.05);
-                    play(level, SoundEvents.GLASS_BREAK, x, y, z, 0.9F, 1.2F);
-                }
-                case HEAL -> play(level, SoundEvents.TOTEM_USE, x, y, z, 0.8F, 1.0F);
-                case LIGHTNING -> {
-                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 40, 1.0, 1.0, 1.0, 0.1);
-                    play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.4F, 1.5F);
-                }
-            }
+            play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.8F, 0.6F);
         }
     }
 

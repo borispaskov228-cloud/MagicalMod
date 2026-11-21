@@ -80,12 +80,18 @@ public final class ModPayloads {
     }
 
     /** Текущая мана для HUD-полосы. */
-    public record ManaUpdatePayload(float mana) implements CustomPacketPayload {
+    public record ManaUpdatePayload(float mana, float maxMana, int level, int xp) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<ManaUpdatePayload> TYPE =
                 new CustomPacketPayload.Type<>(MagicalMod.id("mana_update"));
 
         public static final StreamCodec<RegistryFriendlyByteBuf, ManaUpdatePayload> CODEC =
-                ByteBufCodecs.FLOAT.map(ManaUpdatePayload::new, ManaUpdatePayload::mana).cast();
+                StreamCodec.composite(
+                        ByteBufCodecs.FLOAT, ManaUpdatePayload::mana,
+                        ByteBufCodecs.FLOAT, ManaUpdatePayload::maxMana,
+                        ByteBufCodecs.VAR_INT, ManaUpdatePayload::level,
+                        ByteBufCodecs.VAR_INT, ManaUpdatePayload::xp,
+                        ManaUpdatePayload::new
+                ).cast();
 
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
     }

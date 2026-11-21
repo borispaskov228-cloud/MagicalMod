@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
  * Мышь и клавиши движения не используются — прицел и ходьба не сбиваются.
  */
 public final class GestureDetector {
-    private static final long WINDOW_MS = 5000L;
+    private static final long WINDOW_MS = 12000L;
     private static final long CAST_COOLDOWN_MS = 500L;
 
     private static final List<Gesture.Step> SEQUENCE = new ArrayList<>();

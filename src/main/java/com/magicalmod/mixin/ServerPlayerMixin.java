@@ -12,24 +12,30 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin implements ManaHolder {
-    @Unique
-    private float magicalmod$mana = ManaHolder.MAX_MANA;
+    @Unique private float magicalmod$mana = ManaHolder.BASE_MAX_MANA;
+    @Unique private int magicalmod$level = 0;
+    @Unique private int magicalmod$xp = 0;
 
     @Inject(method = "addAdditionalSaveData", at = @At("HEAD"))
     private void magicalmod$save(ValueOutput output, CallbackInfo ci) {
         output.putFloat("magicalmod:mana", magicalmod$mana);
+        output.putInt("magicalmod:mana_level", magicalmod$level);
+        output.putInt("magicalmod:mana_xp", magicalmod$xp);
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("HEAD"))
     private void magicalmod$load(ValueInput input, CallbackInfo ci) {
-        magicalmod$mana = input.getFloatOr("magicalmod:mana", ManaHolder.MAX_MANA);
+        magicalmod$mana = input.getFloatOr("magicalmod:mana", ManaHolder.BASE_MAX_MANA);
+        magicalmod$level = input.getIntOr("magicalmod:mana_level", 0);
+        magicalmod$xp = input.getIntOr("magicalmod:mana_xp", 0);
     }
 
-    @Override
-    public float magicalmod$getMana() { return magicalmod$mana; }
-
-    @Override
-    public void magicalmod$setMana(float mana) {
-        magicalmod$mana = Math.max(0.0F, Math.min(ManaHolder.MAX_MANA, mana));
+    @Override public float magicalmod$getMana() { return magicalmod$mana; }
+    @Override public void magicalmod$setMana(float mana) {
+        magicalmod$mana = Math.max(0.0F, Math.min(magicalmod$getMaxMana(), mana));
     }
+    @Override public int magicalmod$getManaLevel() { return magicalmod$level; }
+    @Override public void magicalmod$setManaLevel(int level) { magicalmod$level = level; }
+    @Override public int magicalmod$getManaXp() { return magicalmod$xp; }
+    @Override public void magicalmod$setManaXp(int xp) { magicalmod$xp = xp; }
 }

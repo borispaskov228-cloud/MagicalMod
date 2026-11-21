@@ -17,20 +17,30 @@ public final class ManaManager {
         return ((ManaHolder) player).magicalmod$getMana();
     }
 
+    public static float getMax(ServerPlayer player) {
+        return ((ManaHolder) player).magicalmod$getMaxMana();
+    }
+
+    public static int getLevel(ServerPlayer player) {
+        return ((ManaHolder) player).magicalmod$getManaLevel();
+    }
+
+    public static int getXp(ServerPlayer player) {
+        return ((ManaHolder) player).magicalmod$getManaXp();
+    }
+
     public static void set(ServerPlayer player, float value) {
-        float clamped = Math.max(0.0F, Math.min(ManaHolder.MAX_MANA, value));
+        float clamped = Math.max(0.0F, Math.min(getMax(player), value));
         float old = get(player);
         ((ManaHolder) player).magicalmod$setMana(clamped);
-        // HUD обновляем только при реальном изменении
-        if (Math.abs(old - clamped) > 0.001F) sendToClient(player, clamped);
+        if (Math.abs(old - clamped) > 0.001F) sendToClient(player);
     }
 
     /** Копирование маны при респавне — пакет отправит AFTER_RESPAWN. */
     public static void setSilent(ServerPlayer player, float value) {
-        ((ManaHolder) player).magicalmod$setMana(Math.max(0.0F, Math.min(ManaHolder.MAX_MANA, value)));
+        ((ManaHolder) player).magicalmod$setMana(Math.max(0.0F, Math.min(getMax(player), value)));
     }
 
-    /** Списывает ману. Возвращает false, если её не хватило. */
     public static boolean consume(ServerPlayer player, float amount) {
         if (amount < 0.0F) return false;
         float current = get(player);
@@ -44,26 +54,50 @@ public final class ManaManager {
         set(player, get(player) + amount);
     }
 
+    /** Прокачка: очки за касты повышают уровень и максимальную ману. */
+    public static void awardXp(ServerPlayer player, int amount) {
+        ManaHolder holder = (ManaHolder) player;
+        int xp = holder.magicalmod$getManaXp() + amount;
+        int level = holder.magicalmod$getManaLevel();
+        boolean leveled = false;
+
+        while (xp >= ManaHolder.XP_PER_LEVEL && level < ManaHolder.MAX_LEVEL) {
+            xp -= ManaHolder.XP_PER_LEVEL;
+            level++;
+            leveled = true;
+        }
+        if (level >= ManaHolder.MAX_LEVEL) xp = 0;
+
+        holder.magicalmod$setManaXp(xp);
+        holder.magicalmod$setManaLevel(level);
+
+        if (leveled) {
+            player.displayClientMessage(Component.literal(
+                    "§6✦ Уровень магии " + level + "! Максимум маны: " + Math.round(getMax(player))
+            ), false);
+        }
+        sendToClient(player);
+    }
+
     /** +1 мана в секунду каждому игроку. */
     public static void tick(MinecraftServer server) {
         if (++regenCounter < 20) return;
         regenCounter = 0;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (get(player) < ManaHolder.MAX_MANA) add(player, 1.0F);
+            if (get(player) < getMax(player)) add(player, 1.0F);
         }
     }
 
     public static void sendToClient(ServerPlayer player) {
-        sendToClient(player, get(player));
-    }
-
-    private static void sendToClient(ServerPlayer player, float mana) {
-        ServerPlayNetworking.send(player, new ManaUpdatePayload(mana));
+        ServerPlayNetworking.send(player, new ManaUpdatePayload(
+                get(player), getMax(player), getLevel(player), getXp(player)
+        ));
     }
 
     public static void sendMana(ServerPlayer player) {
         player.displayClientMessage(Component.literal(
-                "Мана: " + Math.round(get(player)) + " / " + Math.round(ManaHolder.MAX_MANA)
+                "Мана: " + Math.round(get(player)) + " / " + Math.round(getMax(player))
+                        + "  [ур. " + getLevel(player) + "]"
         ), true);
     }
 }

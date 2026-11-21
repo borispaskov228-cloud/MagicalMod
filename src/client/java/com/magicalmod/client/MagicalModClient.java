@@ -35,7 +35,7 @@ public class MagicalModClient implements ClientModInitializer {
                 SpellAnimations.add(payload, context.client())
         );
         ClientPlayNetworking.registerGlobalReceiver(ManaUpdatePayload.TYPE, (payload, context) ->
-                ManaHud.setMana(payload.mana())
+                ManaHud.setMana(payload.mana(), payload.maxMana(), payload.level(), payload.xp())
         );
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ManaHud.ID, ManaHud::render);
