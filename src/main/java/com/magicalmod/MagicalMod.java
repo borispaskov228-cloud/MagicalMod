@@ -5,6 +5,7 @@ import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
+import com.magicalmod.magic.ManaPotions;
 import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
 import net.fabricmc.api.ModInitializer;
@@ -26,6 +27,7 @@ public class MagicalMod implements ModInitializer {
 
         ModPayloads.register();
         MagicCommands.register();
+        ManaPotions.register();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             RitualManager.reset();

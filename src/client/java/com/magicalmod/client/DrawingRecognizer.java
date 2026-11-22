@@ -137,12 +137,13 @@ public final class DrawingRecognizer {
         float dx = x[n - 1] - x[0], dy = y[n - 1] - y[0];
 
         // 1) Спирали: несколько витков и заметное изменение радиуса.
-        if (radiusSpread > 0.32f && absNet > TWO_PI * 1.5f && turns.sharpCount <= 3) {
+        // Число резких углов здесь не проверяем: шум даёт ложные углы, а число витков и радиус — устойчивы.
+        if (radiusSpread > 0.32f && absNet > TWO_PI * 1.5f) {
             return !closed && radiusRatio < 0.65f ? "inward" : "spiral";
         }
         // Стягивающаяся спираль с меньшим числом витков.
         if (!closed && radiusSpread > 0.28f && radiusRatio < 0.62f
-                && absNet > TWO_PI * 0.9f && turns.sharpCount <= 3) {
+                && absNet > TWO_PI * 0.9f) {
             return "inward";
         }
 
