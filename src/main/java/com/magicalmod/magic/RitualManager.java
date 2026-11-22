@@ -72,11 +72,12 @@ public final class RitualManager {
     }
 
     /** Рисует на земле периметр круга, внутреннее кольцо и вращающийся узор. */
+    private static final DustParticleOptions OUTER_DUST = new DustParticleOptions(0xB15CFF, 1.2F);
+    private static final DustParticleOptions INNER_DUST = new DustParticleOptions(0x66E0FF, 0.9F);
+
     private static void drawCircles(MinecraftServer server) {
         long tick = server.getTickCount();
         double phase = tick * 0.04D;
-        DustParticleOptions outer = new DustParticleOptions(0xB15CFF, 1.2F);
-        DustParticleOptions inner = new DustParticleOptions(0x66E0FF, 0.9F);
 
         for (RitualCircle circle : CIRCLES.values()) {
             ServerLevel world = server.getLevel(circle.dimension());
@@ -84,25 +85,25 @@ public final class RitualManager {
             double cx = circle.x(), cy = circle.y(), cz = circle.z();
 
             // периметр
-            for (int i = 0; i < 64; i++) {
-                double a = i * (Math.PI * 2.0D / 64.0D) + phase;
-                world.sendParticles(outer,
+            for (int i = 0; i < 40; i++) {
+                double a = i * (Math.PI * 2.0D / 40.0D) + phase;
+                world.sendParticles(OUTER_DUST,
                         cx + Math.cos(a) * RitualCircle.RADIUS, cy + 0.15D,
                         cz + Math.sin(a) * RitualCircle.RADIUS, 1, 0, 0, 0, 0);
             }
             // внутреннее кольцо
-            for (int i = 0; i < 40; i++) {
-                double a = i * (Math.PI * 2.0D / 40.0D) - phase;
-                world.sendParticles(inner,
+            for (int i = 0; i < 24; i++) {
+                double a = i * (Math.PI * 2.0D / 24.0D) - phase;
+                world.sendParticles(INNER_DUST,
                         cx + Math.cos(a) * 8.0D, cy + 0.15D,
                         cz + Math.sin(a) * 8.0D, 1, 0, 0, 0, 0);
             }
             // 8 лучей-узор и руны на концах
             for (int s = 0; s < 8; s++) {
                 double a = s * (Math.PI / 4.0D) + phase * 0.5D;
-                for (int j = 1; j <= 7; j++) {
-                    double r = j * (RitualCircle.RADIUS - 2.0D) / 7.0D;
-                    world.sendParticles(inner,
+                for (int j = 1; j <= 4; j++) {
+                    double r = j * (RitualCircle.RADIUS - 2.0D) / 4.0D;
+                    world.sendParticles(INNER_DUST,
                             cx + Math.cos(a) * r, cy + 0.15D,
                             cz + Math.sin(a) * r, 1, 0, 0, 0, 0);
                 }
@@ -117,7 +118,7 @@ public final class RitualManager {
     /** Удаляет просроченные круги раз в секунду и рисует узор. */
     public static void tick(MinecraftServer server) {
         if (CIRCLES.isEmpty()) { tickCounter = 0; return; }
-        if (++tickCounter % 5 == 0) drawCircles(server);
+        if (++tickCounter % 10 == 0) drawCircles(server);
         if (tickCounter < 20) return;
         tickCounter = 0;
 

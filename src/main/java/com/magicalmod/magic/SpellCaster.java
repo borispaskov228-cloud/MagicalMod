@@ -1,8 +1,5 @@
 package com.magicalmod.magic;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -25,6 +22,14 @@ public final class SpellCaster {
     private SpellCaster() {}
 
     private static final java.util.Map<java.util.UUID, Long> LAST_CAST = new java.util.HashMap<>();
+    private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 1.2F);
+    private static final DustParticleOptions HEAL_DUST = new DustParticleOptions(0x77FFAA, 1.0F);
+    private static final DustParticleOptions[] EMPOWER_DUST = {
+            new DustParticleOptions(Spell.FIREBALL.color(), 1.6F),
+            new DustParticleOptions(Spell.FROST.color(), 1.6F),
+            new DustParticleOptions(Spell.HEAL.color(), 1.6F),
+            new DustParticleOptions(Spell.LIGHTNING.color(), 1.6F)
+    };
 
     public static void handle(ServerPlayer player, String spellId) {
         long now = System.currentTimeMillis();
@@ -160,15 +165,15 @@ public final class SpellCaster {
             case FROST -> {
                 level.sendParticles(ParticleTypes.SNOWFLAKE, x, y, z, 70 * k, 2.0, 1.4, 2.0, 0.04);
                 level.sendParticles(ParticleTypes.CLOUD, x, y, z, 22 * k, 1.5, 1.0, 1.5, 0.02);
-                level.sendParticles(new DustParticleOptions(0xAAEEFF, 1.2F), x, y, z, 40 * k, 2.0, 1.0, 2.0, 0.03);
+                level.sendParticles(FROST_DUST, x, y, z, 32 * k, 2.0, 1.0, 2.0, 0.03);
                 play(level, SoundEvents.GLASS_BREAK, x, y, z, 0.9F, 1.2F);
             }
             case HEAL -> {
                 double hx = caster.getX(), hy = caster.getY(), hz = caster.getZ();
                 level.sendParticles(ParticleTypes.HEART, hx, hy + 0.5D, hz, 20 * k, 0.5, 1.2, 0.5, 0.04);
                 level.sendParticles(ParticleTypes.GLOW, hx, hy + 1.0D, hz, 24 * k, 0.8, 1.2, 0.8, 0.03);
-                level.sendParticles(new DustParticleOptions(0x77FFAA, 1.0F), hx, hy + 0.5D, hz,
-                        40 * k, 0.9, 1.0, 0.9, 0.04);
+                level.sendParticles(HEAL_DUST, hx, hy + 0.5D, hz,
+                        32 * k, 0.9, 1.0, 0.9, 0.04);
                 play(level, SoundEvents.TOTEM_USE, x, y, z, 0.8F, 1.0F);
             }
             case LIGHTNING -> {
@@ -180,9 +185,9 @@ public final class SpellCaster {
         }
 
         if (empowered) {
-            level.sendParticles(new DustParticleOptions(spell.color(), 1.6F), x, y, z, 160,
+            level.sendParticles(EMPOWER_DUST[spell.ordinal()], x, y, z, 100,
                     3.5, 3.5, 3.5, 0.25);
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 70, 2.5, 2.5, 2.5, 0.12);
+            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 50, 2.5, 2.5, 2.5, 0.12);
             level.sendParticles(ParticleTypes.EXPLOSION, x, y, z, 3, 0.4, 0.4, 0.4, 0.0);
             play(level, SoundEvents.BEACON_ACTIVATE, x, y, z, 1.0F, 1.2F);
             play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.8F, 0.6F);

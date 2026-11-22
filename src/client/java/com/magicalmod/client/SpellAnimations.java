@@ -22,7 +22,7 @@ public final class SpellAnimations {
         Spell spell = Spell.byId(payload.spellId());
         if (spell == null) return;
 
-        if (EFFECTS.size() >= 8) EFFECTS.remove(0);
+        if (EFFECTS.size() >= 4) EFFECTS.remove(0);
         EFFECTS.add(new Effect(spell, payload.empowered(),
                 payload.x(), payload.y(), payload.z(),
                 payload.empowered() ? 90 : 45));

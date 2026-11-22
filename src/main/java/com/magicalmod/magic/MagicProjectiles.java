@@ -24,6 +24,14 @@ public final class MagicProjectiles {
     private static final List<Bolt> BOLTS = new ArrayList<>();
     private static final double SPEED = 0.9D;
 
+    private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 0.9F);
+    private static final DustParticleOptions[] BURST = {
+            new DustParticleOptions(Spell.FIREBALL.color(), 1.0F),
+            new DustParticleOptions(Spell.FROST.color(), 1.0F),
+            new DustParticleOptions(Spell.HEAL.color(), 1.0F),
+            new DustParticleOptions(Spell.LIGHTNING.color(), 1.0F)
+    };
+
     public static void spawn(ServerPlayer caster, Spell spell, Vec3 origin, Vec3 direction,
                              boolean empowered, float damage, float radius, float range) {
         BOLTS.add(new Bolt(origin, direction.normalize(), caster.level().dimension(),
@@ -79,7 +87,7 @@ public final class MagicProjectiles {
             }
             case FROST -> {
                 world.sendParticles(ParticleTypes.SNOWFLAKE, x, y, z, 2, 0.08, 0.08, 0.08, 0.01);
-                world.sendParticles(new DustParticleOptions(0xAAEEFF, 0.9F), x, y, z, 1, 0.05, 0.05, 0.05, 0.01);
+                world.sendParticles(FROST_DUST, x, y, z, 1, 0.05, 0.05, 0.05, 0.01);
             }
             case HEAL -> {
                 world.sendParticles(ParticleTypes.HEART, x, y, z, 2, 0.08, 0.08, 0.08, 0.01);
@@ -93,9 +101,8 @@ public final class MagicProjectiles {
     }
 
     private static void burst(ServerLevel world, Bolt b) {
-        world.sendParticles(new DustParticleOptions(b.spell.color(), b.empowered ? 1.5F : 1.0F),
-                b.pos.x, b.pos.y, b.pos.z, b.empowered ? 60 : 24,
-                0.8, 0.8, 0.8, 0.1);
+        world.sendParticles(BURST[b.spell.ordinal()], b.pos.x, b.pos.y, b.pos.z,
+                b.empowered ? 40 : 16, 0.8, 0.8, 0.8, 0.1);
     }
 
     private static final class Bolt {
