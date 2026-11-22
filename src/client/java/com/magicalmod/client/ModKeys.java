@@ -22,12 +22,4 @@ public final class ModKeys {
     /** Каст по введённому жесту. */
     public static final KeyMapping CAST = KeyBindingHelper.registerKeyBinding(
             new KeyMapping("key.magicalmod.cast", InputConstants.KEY_RBRACKET, CATEGORY));
-
-    /** Шаг жеста «влево» (A). */
-    public static final KeyMapping GESTURE_LEFT = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping("key.magicalmod.gesture_left", InputConstants.KEY_A, CATEGORY));
-
-    /** Шаг жеста «вправо» (D). */
-    public static final KeyMapping GESTURE_RIGHT = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping("key.magicalmod.gesture_right", InputConstants.KEY_D, CATEGORY));
 }

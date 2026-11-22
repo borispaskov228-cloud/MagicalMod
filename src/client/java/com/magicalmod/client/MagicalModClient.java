@@ -23,11 +23,8 @@ public class MagicalModClient implements ClientModInitializer {
                 if (ModKeys.RITUAL.consumeClick()) {
                     ClientPlayNetworking.send(new RitualActionPayload("open"));
                 }
-                if (ModKeys.CAST.consumeClick()) {
-                    GestureDetector.tryCast(client);
-                }
             }
-            GestureDetector.tick(client);
+            DrawingInput.tick(client);
             SpellAnimations.tick(client);
         });
 
@@ -41,6 +38,7 @@ public class MagicalModClient implements ClientModInitializer {
                 ManaHud.setMana(payload.mana(), payload.maxMana(), payload.level(), payload.xp())
         );
 
+        HudElementRegistry.addLast(com.magicalmod.MagicalMod.id("drawing_overlay"), DrawingInput::render);
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ManaHud.ID, ManaHud::render);
         HudStatusBarHeightRegistry.addRight(ManaHud.ID, player -> ManaHud.isVisible() ? 10 : 0);
     }
