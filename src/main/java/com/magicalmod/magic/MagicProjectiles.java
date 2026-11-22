@@ -25,12 +25,15 @@ public final class MagicProjectiles {
     private static final double SPEED = 0.9D;
 
     private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 0.9F);
-    private static final DustParticleOptions[] BURST = {
-            new DustParticleOptions(Spell.FIREBALL.color(), 1.0F),
-            new DustParticleOptions(Spell.FROST.color(), 1.0F),
-            new DustParticleOptions(Spell.HEAL.color(), 1.0F),
-            new DustParticleOptions(Spell.LIGHTNING.color(), 1.0F)
-    };
+    private static final DustParticleOptions[] DUST = dustOptions(1.0F);
+
+    private static DustParticleOptions[] dustOptions(float scale) {
+        DustParticleOptions[] result = new DustParticleOptions[Spell.values().length];
+        for (Spell spell : Spell.values()) {
+            result[spell.ordinal()] = new DustParticleOptions(spell.color(), scale);
+        }
+        return result;
+    }
 
     public static void spawn(ServerPlayer caster, Spell spell, Vec3 origin, Vec3 direction,
                              boolean empowered, float damage, float radius, float range) {
@@ -54,9 +57,9 @@ public final class MagicProjectiles {
             ServerPlayer caster = server.getPlayerList().getPlayer(b.caster);
             boolean done = false;
 
-            if (b.spell == Spell.HEAL) {
+            if (b.spell.isSelf()) {
                 if (b.age >= b.maxAge) {
-                    if (caster != null) SpellCaster.applyHeal(caster, b.damage, b.empowered);
+                    if (caster != null) SpellCaster.applySelf(caster, b.spell, b.damage, b.empowered);
                     done = true;
                 }
             } else {
@@ -97,11 +100,20 @@ public final class MagicProjectiles {
                 world.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 3, 0.12, 0.12, 0.12, 0.02);
                 world.sendParticles(ParticleTypes.END_ROD, x, y, z, 1, 0.05, 0.05, 0.05, 0.01);
             }
+            case POISON -> world.sendParticles(DUST[b.spell.ordinal()], x, y, z, 2, 0.06, 0.06, 0.06, 0.01);
+            case WATER -> world.sendParticles(ParticleTypes.BUBBLE, x, y, z, 3, 0.08, 0.08, 0.08, 0.01);
+            case WIND -> world.sendParticles(ParticleTypes.CLOUD, x, y, z, 2, 0.1, 0.1, 0.1, 0.01);
+            case SHIELD -> world.sendParticles(ParticleTypes.END_ROD, x, y, z, 2, 0.06, 0.06, 0.06, 0.01);
+            case METEOR -> {
+                world.sendParticles(ParticleTypes.LAVA, x, y, z, 2, 0.08, 0.08, 0.08, 0.01);
+                world.sendParticles(ParticleTypes.FLAME, x, y, z, 2, 0.08, 0.08, 0.08, 0.01);
+            }
+            case PULL -> world.sendParticles(ParticleTypes.PORTAL, x, y, z, 3, 0.08, 0.08, 0.08, 0.01);
         }
     }
 
     private static void burst(ServerLevel world, Bolt b) {
-        world.sendParticles(BURST[b.spell.ordinal()], b.pos.x, b.pos.y, b.pos.z,
+        world.sendParticles(DUST[b.spell.ordinal()], b.pos.x, b.pos.y, b.pos.z,
                 b.empowered ? 40 : 16, 0.8, 0.8, 0.8, 0.1);
     }
 

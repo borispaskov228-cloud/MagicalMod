@@ -24,12 +24,15 @@ public final class SpellCaster {
     private static final java.util.Map<java.util.UUID, Long> LAST_CAST = new java.util.HashMap<>();
     private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 1.2F);
     private static final DustParticleOptions HEAL_DUST = new DustParticleOptions(0x77FFAA, 1.0F);
-    private static final DustParticleOptions[] EMPOWER_DUST = {
-            new DustParticleOptions(Spell.FIREBALL.color(), 1.6F),
-            new DustParticleOptions(Spell.FROST.color(), 1.6F),
-            new DustParticleOptions(Spell.HEAL.color(), 1.6F),
-            new DustParticleOptions(Spell.LIGHTNING.color(), 1.6F)
-    };
+    private static final DustParticleOptions[] EMPOWER_DUST = dustOptions(1.6F);
+
+    private static DustParticleOptions[] dustOptions(float scale) {
+        DustParticleOptions[] result = new DustParticleOptions[Spell.values().length];
+        for (Spell spell : Spell.values()) {
+            result[spell.ordinal()] = new DustParticleOptions(spell.color(), scale);
+        }
+        return result;
+    }
 
     public static void handle(ServerPlayer player, String spellId) {
         long now = System.currentTimeMillis();
@@ -109,10 +112,64 @@ public final class SpellCaster {
                 empowered ? 30 : 12, 0.4D, 0.6D, 0.4D, 0.05D);
     }
 
+    /** Эффекты на самого кастера (лечение и щит) — срабатывают по окончании полёта заряда. */
+    public static void applySelf(ServerPlayer caster, Spell spell, float amount, boolean empowered) {
+        if (spell == Spell.HEAL) {
+            applyHeal(caster, amount, empowered);
+        } else if (spell == Spell.SHIELD) {
+            caster.addEffect(new MobEffectInstance(MobEffects.ABSORPTION,
+                    empowered ? 400 : 200, empowered ? 4 : 1));
+            caster.addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
+                    empowered ? 300 : 150, empowered ? 2 : 0));
+            caster.level().sendParticles(ParticleTypes.END_ROD,
+                    caster.getX(), caster.getY() + 1.0D, caster.getZ(),
+                    empowered ? 60 : 24, 0.6D, 0.8D, 0.6D, 0.05D);
+        }
+    }
+
     public static void applyEffect(ServerPlayer caster, ServerLevel level, Spell spell,
                                     LivingEntity target, float damage, float radius, boolean empowered) {
         switch (spell) {
-            case HEAL -> applyHeal(caster, damage, empowered);
+            case HEAL, SHIELD -> applySelf(caster, spell, damage, empowered);
+            case POISON -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                target.addEffect(new MobEffectInstance(MobEffects.POISON,
+                        empowered ? 200 : 100, empowered ? 2 : 0));
+                target.addEffect(new MobEffectInstance(MobEffects.WITHER, empowered ? 100 : 40, 0));
+                level.sendParticles(EMPOWER_DUST[spell.ordinal()], target.getX(), target.getY() + 1.0D, target.getZ(),
+                        empowered ? 60 : 26, 0.6D, 0.9D, 0.6D, 0.04);
+            }
+            case WATER -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                Vec3 away = target.getEyePosition().subtract(caster.getEyePosition()).normalize();
+                target.setDeltaMovement(away.scale(empowered ? 2.5D : 1.4D).add(0.0D, 0.3D, 0.0D));
+                caster.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0));
+                level.sendParticles(ParticleTypes.BUBBLE, target.getX(), target.getY() + 0.5D, target.getZ(),
+                        empowered ? 60 : 24, 0.7D, 0.8D, 0.7D, 0.05D);
+            }
+            case WIND -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                Vec3 away = target.getEyePosition().subtract(caster.getEyePosition()).normalize();
+                target.setDeltaMovement(away.scale(empowered ? 3.5D : 2.0D).add(0.0D, 0.5D, 0.0D));
+                caster.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 1));
+                level.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY() + 0.8D, target.getZ(),
+                        empowered ? 60 : 26, 0.9D, 0.9D, 0.9D, 0.05D);
+            }
+            case METEOR -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                target.igniteForSeconds(empowered ? 10.0F : 5.0F);
+                level.sendParticles(ParticleTypes.LAVA, target.getX(), target.getY(), target.getZ(),
+                        empowered ? 70 : 30, 0.8D, 0.8D, 0.8D, 0.08D);
+                level.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY() + 1.0D, target.getZ(),
+                        empowered ? 5 : 2, 0.4D, 0.4D, 0.4D, 0.0D);
+            }
+            case PULL -> {
+                target.hurtServer(level, caster.damageSources().magic(), damage);
+                Vec3 toward = caster.getEyePosition().subtract(target.getEyePosition()).normalize();
+                target.setDeltaMovement(toward.scale(empowered ? 2.0D : 1.2D).add(0.0D, 0.2D, 0.0D));
+                level.sendParticles(ParticleTypes.PORTAL, target.getX(), target.getY() + 0.8D, target.getZ(),
+                        empowered ? 50 : 22, 0.6D, 0.8D, 0.6D, 0.05D);
+            }
             case FROST -> {
                 target.hurtServer(level, caster.damageSources().magic(), damage);
                 target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
@@ -181,6 +238,39 @@ public final class SpellCaster {
                 level.sendParticles(ParticleTypes.END_ROD, x, y, z, 24 * k, 0.8, 1.5, 0.8, 0.15);
                 level.sendParticles(ParticleTypes.GLOW, x, y, z, 20 * k, 1.0, 1.0, 1.0, 0.05);
                 play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.4F, 1.6F);
+            }
+            case POISON -> {
+                level.sendParticles(EMPOWER_DUST[spell.ordinal()], x, y, z, 50 * k, 1.2, 1.4, 1.2, 0.03);
+                level.sendParticles(ParticleTypes.CLOUD, x, y, z, 18 * k, 1.0, 1.0, 1.0, 0.02);
+                play(level, SoundEvents.GLASS_BREAK, x, y, z, 0.7F, 0.7F);
+            }
+            case WATER -> {
+                level.sendParticles(ParticleTypes.BUBBLE, x, y, z, 60 * k, 1.4, 1.2, 1.4, 0.06);
+                level.sendParticles(ParticleTypes.DRIPPING_WATER, x, y, z, 22 * k, 1.0, 1.0, 1.0, 0.04);
+                play(level, SoundEvents.GLASS_BREAK, x, y, z, 0.6F, 1.4F);
+            }
+            case WIND -> {
+                level.sendParticles(ParticleTypes.CLOUD, x, y, z, 60 * k, 2.0, 1.0, 2.0, 0.05);
+                level.sendParticles(EMPOWER_DUST[spell.ordinal()], x, y, z, 30 * k, 2.0, 0.6, 2.0, 0.03);
+                play(level, SoundEvents.FIRECHARGE_USE, x, y, z, 0.5F, 1.6F);
+            }
+            case SHIELD -> {
+                level.sendParticles(ParticleTypes.END_ROD, caster.getX(), caster.getY() + 1.0D, caster.getZ(),
+                        40 * k, 1.0D, 1.2D, 1.0D, 0.05D);
+                level.sendParticles(ParticleTypes.GLOW, caster.getX(), caster.getY() + 1.0D, caster.getZ(),
+                        30 * k, 0.8D, 1.0D, 0.8D, 0.03D);
+                play(level, SoundEvents.BEACON_ACTIVATE, x, y, z, 0.7F, 1.3F);
+            }
+            case METEOR -> {
+                level.sendParticles(ParticleTypes.LAVA, x, y, z, 60 * k, 1.5, 1.5, 1.5, 0.08);
+                level.sendParticles(ParticleTypes.FLAME, x, y, z, 70 * k, 1.6, 1.6, 1.6, 0.1);
+                level.sendParticles(ParticleTypes.EXPLOSION, x, y + 1.0D, z, 3 * k, 0.5, 0.5, 0.5, 0.0);
+                play(level, SoundEvents.FIRECHARGE_USE, x, y, z, 1.2F, 0.6F);
+            }
+            case PULL -> {
+                level.sendParticles(ParticleTypes.PORTAL, x, y, z, 50 * k, 1.2, 1.2, 1.2, 0.06);
+                level.sendParticles(EMPOWER_DUST[spell.ordinal()], x, y, z, 30 * k, 1.0, 1.0, 1.0, 0.03);
+                play(level, SoundEvents.ENDER_DRAGON_GROWL, x, y, z, 0.3F, 1.8F);
             }
         }
 

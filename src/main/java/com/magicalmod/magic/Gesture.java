@@ -5,7 +5,13 @@ public enum Gesture {
     FIRE(Spell.FIREBALL, Step.CROUCH, Step.JUMP, Step.RIGHT, Step.LEFT),
     FROST(Spell.FROST, Step.JUMP, Step.LEFT, Step.RIGHT, Step.CROUCH),
     HEAL(Spell.HEAL, Step.CROUCH, Step.CROUCH, Step.JUMP),
-    LIGHTNING(Spell.LIGHTNING, Step.RIGHT, Step.RIGHT, Step.LEFT, Step.JUMP);
+    LIGHTNING(Spell.LIGHTNING, Step.RIGHT, Step.RIGHT, Step.LEFT, Step.JUMP),
+    POISON(Spell.POISON, Step.CROUCH, Step.LEFT, Step.CROUCH, Step.RIGHT),
+    WATER(Spell.WATER, Step.JUMP, Step.CROUCH, Step.LEFT, Step.LEFT),
+    WIND(Spell.WIND, Step.LEFT, Step.RIGHT, Step.LEFT, Step.JUMP),
+    SHIELD(Spell.SHIELD, Step.JUMP, Step.CROUCH, Step.JUMP),
+    METEOR(Spell.METEOR, Step.CROUCH, Step.JUMP, Step.JUMP, Step.RIGHT),
+    PULL(Spell.PULL, Step.RIGHT, Step.LEFT, Step.CROUCH, Step.JUMP);
 
     public enum Step {
         CROUCH, JUMP, LEFT, RIGHT;

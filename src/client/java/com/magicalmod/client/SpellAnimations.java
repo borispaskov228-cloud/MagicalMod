@@ -94,6 +94,62 @@ public final class SpellAnimations {
                 level.addParticle(ParticleTypes.END_ROD, px, py, pz, 0.0D, 0.01D, 0.0D);
                 level.addParticle(e.options, e.x, e.y + e.age * 0.1D, e.z, 0.0D, 0.01D, 0.0D);
             }
+            case POISON -> {
+                // Ядовитое облако, опадающее вниз
+                for (int i = 0; i < 6; i++) {
+                    double a = i * (Math.PI / 3.0D) + e.age * 0.12D;
+                    double px = e.x + Math.cos(a) * radius;
+                    double pz = e.z + Math.sin(a) * radius;
+                    level.addParticle(e.options, px, e.y + (e.age % 12) * 0.06D, pz, 0.0D, -0.01D, 0.0D);
+                }
+            }
+            case WATER -> {
+                // Пузыри, расходящиеся волнами
+                double r = 1.0D + (e.age % 14) * 0.18D;
+                for (int i = 0; i < 8; i++) {
+                    double a = i * (Math.PI / 4.0D) + e.age * 0.1D;
+                    level.addParticle(ParticleTypes.BUBBLE,
+                            e.x + Math.cos(a) * r, e.y + (e.age % 10) * 0.09D,
+                            e.z + Math.sin(a) * r, 0.0D, 0.03D, 0.0D);
+                }
+            }
+            case WIND -> {
+                // Горизонтальные вихри
+                for (int i = 0; i < 6; i++) {
+                    double a = e.age * 0.5D + i * (Math.PI / 3.0D);
+                    level.addParticle(ParticleTypes.CLOUD,
+                            e.x + Math.cos(a) * (radius + 1.0D), e.y + 0.3D,
+                            e.z + Math.sin(a) * (radius + 1.0D), 0.02D, 0.0D, 0.02D);
+                }
+            }
+            case SHIELD -> {
+                // Вращающаяся оборонительная сфера
+                for (int i = 0; i < 8; i++) {
+                    double a = e.age * 0.25D + i * (Math.PI / 4.0D);
+                    level.addParticle(ParticleTypes.END_ROD,
+                            e.x + Math.cos(a) * 1.6D, e.y + Math.sin(a * 2.0D) * 0.8D,
+                            e.z + Math.sin(a) * 1.6D, 0.0D, 0.01D, 0.0D);
+                }
+            }
+            case METEOR -> {
+                // Падающие лава и искры
+                for (int i = 0; i < 7; i++) {
+                    double a = i * (Math.PI * 2.0D / 7.0D);
+                    level.addParticle(ParticleTypes.LAVA,
+                            e.x + Math.cos(a) * radius, e.y + 2.0D - (e.age % 10) * 0.2D,
+                            e.z + Math.sin(a) * radius, 0.0D, -0.08D, 0.0D);
+                }
+            }
+            case PULL -> {
+                // Спираль, стягивающаяся к центру
+                double r = Math.max(0.3D, 3.0D - e.age * 0.12D);
+                for (int i = 0; i < 6; i++) {
+                    double a = e.age * 0.4D + i * (Math.PI / 3.0D);
+                    level.addParticle(ParticleTypes.PORTAL,
+                            e.x + Math.cos(a) * r, e.y + 0.5D, e.z + Math.sin(a) * r,
+                            -Math.cos(a) * 0.05D, 0.0D, -Math.sin(a) * 0.05D);
+                }
+            }
         }
 
         if (e.empowered) {
