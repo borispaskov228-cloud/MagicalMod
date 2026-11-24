@@ -22,6 +22,7 @@ public final class ModPayloads {
         PayloadTypeRegistry.playS2C().register(RitualStatusPayload.TYPE, RitualStatusPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(CastFxPayload.TYPE, CastFxPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ManaUpdatePayload.TYPE, ManaUpdatePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(OpenGuidePayload.TYPE, OpenGuidePayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(CastSpellPayload.TYPE, (payload, context) ->
                 SpellCaster.handle(context.player(), payload.spellId())
@@ -88,6 +89,20 @@ public final class ModPayloads {
                         ByteBufCodecs.VAR_INT, ManaUpdatePayload::level,
                         ByteBufCodecs.VAR_INT, ManaUpdatePayload::xp,
                         ManaUpdatePayload::new
+                ).cast();
+
+        @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    }
+
+    /** Сигнал клиенту открыть красивый GUI-гид вместо книги. */
+    public record OpenGuidePayload() implements CustomPacketPayload {
+        public static final CustomPacketPayload.Type<OpenGuidePayload> TYPE =
+                new CustomPacketPayload.Type<>(MagicalMod.id("open_guide"));
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenGuidePayload> CODEC =
+                StreamCodec.of(
+                        (RegistryFriendlyByteBuf buf, OpenGuidePayload payload) -> {},
+                        (RegistryFriendlyByteBuf buf) -> new OpenGuidePayload()
                 ).cast();
 
         @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }

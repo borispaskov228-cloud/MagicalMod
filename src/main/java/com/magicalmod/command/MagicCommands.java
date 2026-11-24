@@ -5,6 +5,8 @@ import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.ManaPotions;
 import com.magicalmod.boss.BossContent;
+import com.magicalmod.net.ModPayloads.OpenGuidePayload;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import com.magicalmod.content.ModContent;
 import com.magicalmod.staff.StaffContent;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -31,6 +33,7 @@ public final class MagicCommands {
                         .then(Commands.literal("mana").executes(MagicCommands::mana))
                         .then(Commands.literal("gestures").executes(MagicCommands::gestures))
                         .then(Commands.literal("book").executes(MagicCommands::book))
+                        .then(Commands.literal("guide").executes(MagicCommands::guide))
                         .then(Commands.literal("refill").executes(MagicCommands::refill))
                         .then(Commands.literal("potions").executes(MagicCommands::potions))
                         .then(Commands.literal("staffs").executes(MagicCommands::staffs))
@@ -51,7 +54,7 @@ public final class MagicCommands {
 
     private static int help(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSystemMessage(Component.literal(
-                "§6Магия §f— /magic mana | /magic gestures | /magic book | /magic refill | /magic potions | /magic level <0-10>. Меню: §6\\"
+                "§6Магия §f— /magic mana | /magic gestures | /magic book | /magic guide | /magic refill | /magic potions | /magic level <0-10>. Меню: §6\\"
         ));
         return 1;
     }
@@ -119,6 +122,11 @@ public final class MagicCommands {
         p.displayClientMessage(Component.literal(
                 "§6Уровень магии: " + level + ", максимум: " + Math.round(ManaManager.getMax(p))
         ), false);
+        return 1;
+    }
+
+    private static int guide(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayNetworking.send(player(ctx), new OpenGuidePayload());
         return 1;
     }
 

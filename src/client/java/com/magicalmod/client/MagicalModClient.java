@@ -1,7 +1,9 @@
 package com.magicalmod.client;
 
 import com.magicalmod.net.ModPayloads.CastFxPayload;
+import com.magicalmod.guide.GuideScreen;
 import com.magicalmod.net.ModPayloads.ManaUpdatePayload;
+import com.magicalmod.net.ModPayloads.OpenGuidePayload;
 import com.magicalmod.net.ModPayloads.RitualActionPayload;
 import com.magicalmod.net.ModPayloads.RitualStatusPayload;
 import net.fabricmc.api.ClientModInitializer;
@@ -38,6 +40,9 @@ public class MagicalModClient implements ClientModInitializer {
         );
         ClientPlayNetworking.registerGlobalReceiver(ManaUpdatePayload.TYPE, (payload, context) ->
                 ManaHud.setMana(payload.mana(), payload.maxMana(), payload.level(), payload.xp())
+        );
+        ClientPlayNetworking.registerGlobalReceiver(OpenGuidePayload.TYPE, (payload, context) ->
+                context.client().setScreen(new GuideScreen())
         );
 
         HudElementRegistry.addLast(com.magicalmod.MagicalMod.id("drawing_overlay"), DrawingInput::render);

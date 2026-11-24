@@ -4,6 +4,7 @@ import com.magicalmod.boss.BossContent;
 import com.magicalmod.command.MagicCommands;
 import com.magicalmod.content.ModContent;
 import com.magicalmod.magic.GuideBook;
+import com.magicalmod.magic.GuideBookHandler;
 import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
@@ -32,6 +33,7 @@ public class MagicalMod implements ModInitializer {
         ModPayloads.register();
         MagicCommands.register();
         ManaPotions.register();
+        GuideBookHandler.register();
         StaffContent.register();
         ModContent.register();
         BossContent.register();
