@@ -19,7 +19,7 @@ public final class StaffContent {
 
     /** +25% к силе магии. */
     public static final Item STAFF_NOVICE = new StaffItem(
-            1.25F,
+            "staff_novice", 1.25F,
             "§6Посох новичка",
             Rarity.UNCOMMON,
             List.of(
@@ -29,7 +29,7 @@ public final class StaffContent {
 
     /** +60% к силе магии. */
     public static final Item STAFF_ADEPT = new StaffItem(
-            1.60F,
+            "staff_adept", 1.60F,
             "§bПосох адепта",
             Rarity.RARE,
             List.of(
@@ -40,7 +40,7 @@ public final class StaffContent {
 
     /** +120% к силе магии. */
     public static final Item STAFF_ARCHMAGE = new StaffItem(
-            2.20F,
+            "staff_archmage", 2.20F,
             "§dПосох архимага",
             Rarity.EPIC,
             List.of(

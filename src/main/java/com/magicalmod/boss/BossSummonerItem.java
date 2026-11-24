@@ -2,6 +2,10 @@ package com.magicalmod.boss;
 
 import java.util.List;
 
+import com.magicalmod.MagicalMod;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -20,6 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public final class BossSummonerItem extends Item {
     public BossSummonerItem() {
         super(new Item.Properties()
+                .setId(ResourceKey.create(Registries.ITEM, MagicalMod.id("boss_summoner")))
                 .stacksTo(1)
                 .rarity(Rarity.EPIC)
                 .component(DataComponents.CUSTOM_NAME,

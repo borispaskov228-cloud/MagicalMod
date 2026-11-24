@@ -24,11 +24,16 @@ public final class ModContent {
 
     public static final Block MANA_HERB_BLOCK = new ManaHerbBlock();
 
+    /** В 1.21.11 у каждого предмета в Properties тоже обязан быть задан ID. */
+    private static Item.Properties itemProps(String path) {
+        return new Item.Properties().setId(ResourceKey.create(Registries.ITEM, MagicalMod.id(path)));
+    }
+
     /** BlockItem, чтобы растение можно было поставить и вырастить/сорвать. */
-    public static final Item MANA_HERB_ITEM = new BlockItem(MANA_HERB_BLOCK, new Item.Properties());
-    public static final Item MANA_POTION_SMALL = new Item(new Item.Properties());
-    public static final Item MANA_POTION_MEDIUM = new Item(new Item.Properties());
-    public static final Item MANA_POTION_LARGE = new Item(new Item.Properties());
+    public static final Item MANA_HERB_ITEM = new BlockItem(MANA_HERB_BLOCK, itemProps("mana_herb"));
+    public static final Item MANA_POTION_SMALL = new Item(itemProps("mana_potion_small"));
+    public static final Item MANA_POTION_MEDIUM = new Item(itemProps("mana_potion_medium"));
+    public static final Item MANA_POTION_LARGE = new Item(itemProps("mana_potion_large"));
 
     /**
      * В 1.21.11 константы вкладок в {@code CreativeModeTabs} приватные,
@@ -38,7 +43,12 @@ public final class ModContent {
             Registries.CREATIVE_MODE_TAB,
             Identifier.fromNamespaceAndPath("minecraft", "natural_blocks"));
 
+    private static boolean registered;
+
     public static void register() {
+        if (registered) return;
+        registered = true;
+
         // В 1.21.11 Registries.BLOCK/ITEM — это ResourceKey, а не Registry,
         // поэтому используется BuiltInRegistries.
         Registry.register(BuiltInRegistries.BLOCK, MagicalMod.id("mana_herb"), MANA_HERB_BLOCK);

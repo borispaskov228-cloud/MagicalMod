@@ -2,6 +2,10 @@ package com.magicalmod.staff;
 
 import java.util.List;
 
+import com.magicalmod.MagicalMod;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -18,8 +22,9 @@ import net.minecraft.world.level.Level;
 final class StaffItem extends Item {
     private final float multiplier;
 
-    StaffItem(float multiplier, String displayName, Rarity rarity, List<Component> lore) {
+    StaffItem(String idPath, float multiplier, String displayName, Rarity rarity, List<Component> lore) {
         super(new Item.Properties()
+                .setId(ResourceKey.create(Registries.ITEM, MagicalMod.id(idPath)))
                 .stacksTo(1)
                 .rarity(rarity)
                 .component(DataComponents.CUSTOM_NAME, Component.literal(displayName))
