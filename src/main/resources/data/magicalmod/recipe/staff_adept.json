@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": "minecraft:diamond",
+    "E": "minecraft:emerald",
+    "N": "magicalmod:staff_novice"
+  },
+  "pattern": [
+    " D ",
+    " N ",
+    " E "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magicalmod:staff_adept"
+  }
+}

@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import com.magicalmod.net.ModPayloads.CastFxPayload;
+import com.magicalmod.staff.StaffContent;
 
 /** Исполнение заклинаний на сервере. */
 public final class SpellCaster {
@@ -64,7 +65,7 @@ public final class SpellCaster {
         ManaManager.consume(player, cost);
 
         float multiplier = empowered ? 1.0F + Math.min(5.0F, pooled / 40.0F) : 1.0F;
-        float damage = spell.basePower() * multiplier;
+        float damage = spell.basePower() * multiplier * StaffContent.multiplier(player);
         float radius = empowered ? 6.0F : 3.0F;
 
         ServerLevel level = player.level();

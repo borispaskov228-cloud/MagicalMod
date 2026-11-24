@@ -2,6 +2,8 @@ package com.magicalmod.magic;
 
 import java.util.List;
 
+import com.magicalmod.content.ModContent;
+
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;

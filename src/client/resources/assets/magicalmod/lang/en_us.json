@@ -1,6 +1,13 @@
 {
   "key.magicalmod.ritual": "Magic circle (menu)",
   "key.magicalmod.cast": "Draw magic (hold)",
+  "item.magicalmod.mana_herb": "Mana herb",
+  "item.magicalmod.mana_potion_small": "Small mana potion",
+  "item.magicalmod.mana_potion_medium": "Medium mana potion",
+  "item.magicalmod.mana_potion_large": "Large mana potion",
+  "item.magicalmod.staff_novice": "Novice staff",
+  "item.magicalmod.staff_adept": "Adept staff",
+  "item.magicalmod.staff_archmage": "Archmage staff",
   "category.magicalmod": "MagicalMod",
   "key.category.magicalmod.category": "MagicalMod",
   "magicalmod:category": "MagicalMod"

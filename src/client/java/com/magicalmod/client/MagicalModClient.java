@@ -17,6 +17,7 @@ public class MagicalModClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Регистрация биндов должна произойти до инициализации GameOptions
         ModKeys.init();
+        com.magicalmod.boss.BossClient.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player != null) {

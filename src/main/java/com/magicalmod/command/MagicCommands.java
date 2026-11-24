@@ -5,6 +5,9 @@ import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.ManaPotions;
+import com.magicalmod.boss.BossContent;
+import com.magicalmod.content.ModContent;
+import com.magicalmod.staff.StaffContent;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -31,6 +34,9 @@ public final class MagicCommands {
                         .then(Commands.literal("book").executes(MagicCommands::book))
                         .then(Commands.literal("refill").executes(MagicCommands::refill))
                         .then(Commands.literal("potions").executes(MagicCommands::potions))
+                        .then(Commands.literal("staffs").executes(MagicCommands::staffs))
+                        .then(Commands.literal("herb").executes(MagicCommands::herb))
+                        .then(Commands.literal("boss").executes(MagicCommands::boss))
                         .then(Commands.literal("level")
                                 .then(Commands.argument("level", IntegerArgumentType.integer(0, ManaHolder.MAX_LEVEL))
                                         .executes(MagicCommands::setLevel)))
@@ -71,6 +77,36 @@ public final class MagicCommands {
             if (!p.getInventory().add(stack)) p.drop(stack, false);
         }
         ctx.getSource().sendSystemMessage(Component.literal("§bВыдано 3 зелья маны"));
+        return 1;
+    }
+
+    private static int staffs(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = player(ctx);
+        for (ItemStack stack : new ItemStack[]{
+                new ItemStack(StaffContent.STAFF_NOVICE),
+                new ItemStack(StaffContent.STAFF_ADEPT),
+                new ItemStack(StaffContent.STAFF_ARCHMAGE)}) {
+            if (!p.getInventory().add(stack)) p.drop(stack, false);
+        }
+        ctx.getSource().sendSystemMessage(Component.literal("§6Выданы 3 посоха"));
+        return 1;
+    }
+
+    private static int herb(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = player(ctx);
+        for (int i = 0; i < 8; i++) {
+            ItemStack stack = new ItemStack(ModContent.MANA_HERB_ITEM);
+            if (!p.getInventory().add(stack)) p.drop(stack, false);
+        }
+        ctx.getSource().sendSystemMessage(Component.literal("§aВыдано 8 травы маны"));
+        return 1;
+    }
+
+    private static int boss(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer p = player(ctx);
+        ItemStack stack = new ItemStack(BossContent.BOSS_SUMMONER);
+        if (!p.getInventory().add(stack)) p.drop(stack, false);
+        ctx.getSource().sendSystemMessage(Component.literal("§5Выдан призыватель Архимага Пустоты"));
         return 1;
     }
 

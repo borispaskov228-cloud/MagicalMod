@@ -1,6 +1,8 @@
 package com.magicalmod;
 
+import com.magicalmod.boss.BossContent;
 import com.magicalmod.command.MagicCommands;
+import com.magicalmod.content.ModContent;
 import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
@@ -8,6 +10,7 @@ import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.ManaPotions;
 import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
+import com.magicalmod.staff.StaffContent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -28,6 +31,9 @@ public class MagicalMod implements ModInitializer {
         ModPayloads.register();
         MagicCommands.register();
         ManaPotions.register();
+        StaffContent.register();
+        ModContent.register();
+        BossContent.register();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             RitualManager.reset();

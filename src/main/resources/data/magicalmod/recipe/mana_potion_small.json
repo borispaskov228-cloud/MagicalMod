@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "H": "magicalmod:mana_herb",
+    "B": "minecraft:glass_bottle"
+  },
+  "pattern": [
+    "H",
+    "B"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magicalmod:mana_potion_small"
+  }
+}

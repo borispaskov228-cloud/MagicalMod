@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "E": "minecraft:echo_shard",
+    "H": "minecraft:netherite_ingot",
+    "N": "magicalmod:staff_adept"
+  },
+  "pattern": [
+    " E ",
+    " N ",
+    " H "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magicalmod:staff_archmage"
+  }
+}
