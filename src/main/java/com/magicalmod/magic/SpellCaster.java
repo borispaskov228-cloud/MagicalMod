@@ -14,8 +14,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import com.magicalmod.net.ModPayloads.CastFxPayload;
 import com.magicalmod.staff.StaffContent;
 
 /** Исполнение заклинаний на сервере. */
@@ -23,6 +21,8 @@ public final class SpellCaster {
     private SpellCaster() {}
 
     private static final java.util.Map<java.util.UUID, Long> LAST_CAST = new java.util.HashMap<>();
+
+    public static void forget(java.util.UUID uuid) { LAST_CAST.remove(uuid); }
     private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 1.2F);
     private static final DustParticleOptions HEAL_DUST = new DustParticleOptions(0x77FFAA, 1.0F);
     private static final DustParticleOptions[] EMPOWER_DUST = dustOptions(1.6F);
@@ -36,6 +36,7 @@ public final class SpellCaster {
     }
 
     public static void handle(ServerPlayer player, String spellId) {
+        if (player == null || !player.isAlive() || player.isRemoved()) return;
         long now = System.currentTimeMillis();
         Long last = LAST_CAST.get(player.getUUID());
         if (last != null && now - last < 250L) return;
@@ -68,16 +69,13 @@ public final class SpellCaster {
         float damage = spell.basePower() * multiplier * StaffContent.multiplier(player);
         float radius = empowered ? 6.0F : 3.0F;
 
-        ServerLevel level = player.level();
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1.0F);
-        Vec3 hit = eye.add(look.scale(empowered ? 9.0 : 6.0));
 
-        // Магия летит зарядом; эффект применяется только при попадании
-        float range = spell == Spell.HEAL ? 6.0F : (empowered ? 18.0F : 12.0F);
+        // Магия летит зарядом; эффект и анимация применяются только при попадании
+        float range = spell.isSelf() ? 6.0F : (empowered ? 18.0F : 12.0F);
         MagicProjectiles.spawn(player, spell, eye.add(look.scale(0.6D)), look,
                 empowered, damage, radius, range);
-        spawnEffect(level, player, spell, eye, empowered, pooled);
 
         if (empowered) {
             RitualManager.notifyNear(player, Component.literal(
@@ -91,16 +89,7 @@ public final class SpellCaster {
         }
         ManaManager.sendMana(player);
         ManaManager.awardXp(player, empowered ? 4 : 2);
-
-        // Анимация: размахивание рукой + FX-пакет всем nearby игрокам
         player.swing(InteractionHand.MAIN_HAND);
-        CastFxPayload fx = new CastFxPayload(spell.id(), empowered,
-                player.getUUID().toString(), hit.x, hit.y, hit.z);
-        for (ServerPlayer viewer : level.getServer().getPlayerList().getPlayers()) {
-            if (viewer.level() == level && viewer.distanceToSqr(hit.x, hit.y, hit.z) < 1024.0D) {
-                ServerPlayNetworking.send(viewer, fx);
-            }
-        }
     }
 
     public static void applyHeal(ServerPlayer caster, float amount, boolean empowered) {

@@ -9,6 +9,8 @@ public final class RitualActions {
 
     private static final java.util.Map<java.util.UUID, Long> LAST_ACTION = new java.util.HashMap<>();
 
+    public static void forget(java.util.UUID uuid) { LAST_ACTION.remove(uuid); }
+
     public static String handle(ServerPlayer player, String action) {
         long now = System.currentTimeMillis();
         Long last = LAST_ACTION.get(player.getUUID());

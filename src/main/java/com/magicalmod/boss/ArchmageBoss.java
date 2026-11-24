@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -51,6 +54,11 @@ public class ArchmageBoss extends Mob {
     private static final int TELEPORT_TICKS = 45;
     private static final int RUNE_TICKS = 55;
 
+    private static final EntityDataAccessor<Integer> DATA_PHASE =
+            SynchedEntityData.defineId(ArchmageBoss.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_SHIELD =
+            SynchedEntityData.defineId(ArchmageBoss.class, EntityDataSerializers.BOOLEAN);
+
     private int phase = 1;
     private int abilityTimer = 60;
     private int animationTick = 0;
@@ -77,13 +85,20 @@ public class ArchmageBoss extends Mob {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.6D);
     }
 
-    /** 1, 2 or 3. Public so the client renderer and integrations can read it. */
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_PHASE, 1);
+        builder.define(DATA_SHIELD, false);
+    }
+
+    /** 1, 2 or 3. Синхронизировано с клиентом для рендера. */
     public int getPhase() {
-        return this.phase;
+        return this.entityData.get(DATA_PHASE);
     }
 
     public boolean isShieldActive() {
-        return this.shieldActive;
+        return this.entityData.get(DATA_SHIELD);
     }
 
     @Override
@@ -102,7 +117,7 @@ public class ArchmageBoss extends Mob {
         if (isAntimagic(source)) {
             damage *= ANTI_MAGIC_MULTIPLIER;
             // "Светоснятие": антимагия сбивает щит, данный приспешниками.
-            breakShield();
+            breakShield(level);
             Vec3 p = this.position();
             level.sendParticles(ParticleTypes.END_ROD, p.x, p.y + 1.2D, p.z,
                     28, 0.9D, 1.2D, 0.9D, 0.25D);
@@ -168,9 +183,11 @@ public class ArchmageBoss extends Mob {
     private void updatePhase(ServerLevel level) {
         float ratio = this.getHealth() / Math.max(1.0F, this.getMaxHealth());
         int next = ratio > PHASE_2_AT ? 1 : (ratio > PHASE_3_AT ? 2 : 3);
-        if (next == this.phase) return;
+        // Фазы только вперёд: лечение босса не должно откатывать призыв минионов
+        if (next <= this.phase) return;
 
         this.phase = next;
+        this.entityData.set(DATA_PHASE, next);
         this.abilityTimer = 20;
         Vec3 p = this.position();
         level.sendParticles(ParticleTypes.PORTAL, p.x, p.y + 1.0D, p.z,
@@ -188,7 +205,7 @@ public class ArchmageBoss extends Mob {
 
         LivingEntity best = null;
         double bestDist = Double.MAX_VALUE;
-        for (Player player : level.getPlayers(p -> p.isAlive() && !p.isCreative())) {
+        for (Player player : level.getPlayers(p -> p.isAlive() && !p.isCreative() && !p.isSpectator())) {
             double d = this.distanceToSqr(player);
             if (d < bestDist) {
                 bestDist = d;
@@ -252,7 +269,6 @@ public class ArchmageBoss extends Mob {
             snowball.setPos(origin.add(dir.scale(1.2D)));
             snowball.setDeltaMovement(tip);
             level.addFreshEntity(snowball);
-            target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 80, 0));
             level.sendParticles(ParticleTypes.SNOWFLAKE, origin.x, origin.y, origin.z,
                     16, 0.3D, 0.3D, 0.3D, 0.05D);
             this.playSound(SoundEvents.GLASS_BREAK, 0.5F, 1.3F);
@@ -352,7 +368,7 @@ public class ArchmageBoss extends Mob {
     }
 
     private void damageAround(ServerLevel level, Vec3 center, double radius, float damage) {
-        for (Player player : level.getPlayers(p -> p.isAlive() && !p.isCreative())) {
+        for (Player player : level.getPlayers(p -> p.isAlive() && !p.isCreative() && !p.isSpectator())) {
             double dx = player.getX() - center.x;
             double dy = player.getY() - center.y;
             double dz = player.getZ() - center.z;
@@ -409,15 +425,25 @@ public class ArchmageBoss extends Mob {
             this.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 40, 2));
             this.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 40, 3));
             this.shieldActive = true;
+            this.entityData.set(DATA_SHIELD, true);
         } else if (this.shieldActive) {
-            breakShield();
+            breakShield(level);
         }
     }
 
-    private void breakShield() {
+    private void breakShield(ServerLevel level) {
         this.removeEffect(MobEffects.RESISTANCE);
         this.removeEffect(MobEffects.ABSORPTION);
         this.shieldActive = false;
+        this.entityData.set(DATA_SHIELD, false);
+
+        // Антимагия убивает приспешников, иначе щит поднялся бы снова на следующем тике
+        for (UUID id : this.minions) {
+            Entity e = level.getEntity(id);
+            if (e instanceof LivingEntity living && living.isAlive()) {
+                living.hurtServer(level, level.damageSources().magic(), living.getMaxHealth() + 1.0F);
+            }
+        }
         this.minions.clear();
     }
 

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 /** Кастомное меню круга магии. ВСЕ цвета — с альфой 0xFF, иначе прозрачные. */
 public class RitualScreen extends Screen {
     private static final int PANEL_W = 250;
-    private static final int PANEL_H = 214;
+    private static final int PANEL_H = 266;
 
     private final String status;
     private int panelX;
@@ -27,7 +27,7 @@ public class RitualScreen extends Screen {
         panelY = (this.height - PANEL_H) / 2;
 
         int bx = panelX + 25;
-        int y = panelY + 78;
+        int y = panelY + 112;
         addRenderableWidget(styleButton(bx, y, 200, 20, "§a✦ Создать круг", "start", 0xFF2E7D52));
         addRenderableWidget(styleButton(bx, y + 24, 200, 20, "§b➜ Вступить в круг", "join", 0xFF2E5D8A));
         addRenderableWidget(styleButton(bx, y + 48, 200, 20, "§e✕ Выйти из круга", "leave", 0xFF8A6A2E));

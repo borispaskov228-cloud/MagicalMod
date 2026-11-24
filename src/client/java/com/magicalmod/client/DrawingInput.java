@@ -40,8 +40,14 @@ public final class DrawingInput {
 
     public static void tick(Minecraft client) {
         LocalPlayer player = client.player;
-        boolean down = player != null && client.screen == null && ModKeys.CAST.isDown();
 
+        // Выход из мира/открытие экрана во время рисования — тихо отменяем жест
+        if (player == null || client.screen != null) {
+            if (drawing || wasDown) cancel();
+            return;
+        }
+
+        boolean down = ModKeys.CAST.isDown();
         if (down && !wasDown) start(player);
         else if (down && drawing) record(player);
         else if (!down && wasDown) finish(client);
@@ -80,19 +86,29 @@ public final class DrawingInput {
 
     private static void finish(Minecraft client) {
         drawing = false;
+        wasDown = false;
         String shape = DrawingRecognizer.recognize(POINTS);
-        String spellId = SHAPE_TO_SPELL.get(shape);
-
-        if (spellId != null) {
-            ClientPlayNetworking.send(new CastSpellPayload(spellId));
-            Spell spell = Spell.byId(spellId);
-            client.gui.setOverlayMessage(Component.literal(
-                    "§5✧ " + (spell == null ? spellId : spell.displayName())
-            ), false);
-        } else if (!POINTS.isEmpty()) {
-            client.gui.setOverlayMessage(Component.literal("§cФорма не распознана"), false);
-        }
         POINTS.clear();
+
+        if (shape.isEmpty() || client.getConnection() == null) return;
+
+        String spellId = SHAPE_TO_SPELL.get(shape);
+        if (spellId == null) {
+            client.gui.setOverlayMessage(Component.literal("§cФорма не распознана"), false);
+            return;
+        }
+
+        ClientPlayNetworking.send(new CastSpellPayload(spellId));
+        Spell spell = Spell.byId(spellId);
+        client.gui.setOverlayMessage(Component.literal(
+                "§5✧ " + (spell == null ? spellId : spell.displayName())
+        ), false);
+    }
+
+    private static void cancel() {
+        POINTS.clear();
+        drawing = false;
+        wasDown = false;
     }
 
     /** Отрисовка нарисованного пути поверх HUD. */

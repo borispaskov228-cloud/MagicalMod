@@ -18,6 +18,14 @@ public final class ManaHud {
 
     private ManaHud() {}
 
+    public static void reset() {
+        mana = 0.0F;
+        maxMana = 100.0F;
+        level = 0;
+        xp = 0;
+        initialized = false;
+    }
+
     public static void setMana(float value, float max, int lvl, int experience) {
         mana = value;
         maxMana = Math.max(1.0F, max);

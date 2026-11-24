@@ -46,10 +46,8 @@ public final class RitualCircle {
 
     /** Выход участника: его мана возвращается в пул круга (не игроку). */
     public boolean removeContributor(UUID uuid) {
-        Float value = contributions.remove(uuid);
-        if (value == null) return false;
-        pool = Math.max(0.0F, pool - value);
-        return true;
+        // Взнос остаётся в общем резервуаре круга — игрок его не возвращает
+        return contributions.remove(uuid) != null;
     }
 
     /** Забирает всю ману круга и очищает список участников. */

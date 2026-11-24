@@ -23,17 +23,14 @@ public final class ModPayloads {
         PayloadTypeRegistry.playS2C().register(CastFxPayload.TYPE, CastFxPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ManaUpdatePayload.TYPE, ManaUpdatePayload.CODEC);
 
-        ServerPlayNetworking.registerGlobalReceiver(CastSpellPayload.TYPE, (payload, context) -> {
-            ServerPlayer player = context.player();
-            context.server().execute(() -> SpellCaster.handle(player, payload.spellId()));
-        });
+        ServerPlayNetworking.registerGlobalReceiver(CastSpellPayload.TYPE, (payload, context) ->
+                SpellCaster.handle(context.player(), payload.spellId())
+        );
 
         ServerPlayNetworking.registerGlobalReceiver(RitualActionPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
-            context.server().execute(() -> {
-                String status = RitualActions.handle(player, payload.action());
-                ServerPlayNetworking.send(player, new RitualStatusPayload(status));
-            });
+            String status = RitualActions.handle(player, payload.action());
+            ServerPlayNetworking.send(player, new RitualStatusPayload(status));
         });
     }
 

@@ -1,6 +1,7 @@
 {
   "key.magicalmod.ritual": "Magic circle (menu)",
   "key.magicalmod.cast": "Draw magic (hold)",
+  "block.magicalmod.mana_herb": "Mana herb",
   "item.magicalmod.mana_herb": "Mana herb",
   "item.magicalmod.mana_potion_small": "Small mana potion",
   "item.magicalmod.mana_potion_medium": "Medium mana potion",
@@ -8,6 +9,9 @@
   "item.magicalmod.staff_novice": "Novice staff",
   "item.magicalmod.staff_adept": "Adept staff",
   "item.magicalmod.staff_archmage": "Archmage staff",
+  "item.magicalmod.boss_summoner": "Archmage summoner",
+  "item.magicalmod.boss_core": "Archmage core",
+  "entity.magicalmod.archmage_boss": "Archmage of the Void",
   "category.magicalmod": "MagicalMod",
   "key.category.magicalmod.category": "MagicalMod",
   "magicalmod:category": "MagicalMod"

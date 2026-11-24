@@ -17,6 +17,7 @@ public final class SpellAnimations {
     private SpellAnimations() {}
 
     private static final List<Effect> EFFECTS = new ArrayList<>();
+    private static ClientLevel lastLevel = null;
 
     public static void add(CastFxPayload payload, Minecraft client) {
         Spell spell = Spell.byId(payload.spellId());
@@ -34,9 +35,10 @@ public final class SpellAnimations {
 
     public static void tick(Minecraft client) {
         ClientLevel level = client.level;
-        if (level == null) {
+        if (level == null || level != lastLevel) {
             EFFECTS.clear();
-            return;
+            lastLevel = level;
+            if (level == null) return;
         }
 
         Iterator<Effect> it = EFFECTS.iterator();

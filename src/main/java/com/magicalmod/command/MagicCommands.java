@@ -1,6 +1,5 @@
 package com.magicalmod.command;
 
-import com.magicalmod.magic.Gesture;
 import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
@@ -52,7 +51,7 @@ public final class MagicCommands {
 
     private static int help(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSystemMessage(Component.literal(
-                "§6Магия §f— /magic mana | /magic gestures | /magic book | /magic refill | /magic potions | /magic level <0-10>. Меню: §6G"
+                "§6Магия §f— /magic mana | /magic gestures | /magic book | /magic refill | /magic potions | /magic level <0-10>. Меню: §6\\"
         ));
         return 1;
     }
@@ -129,12 +128,15 @@ public final class MagicCommands {
     }
 
     private static int gestures(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSystemMessage(Component.literal("§6Жесты (выполняются подряд):"));
-        for (Gesture gesture : Gesture.values()) {
-            ctx.getSource().sendSystemMessage(Component.literal(
-                    "§f" + gesture.spell().displayName() + " §7— " + gesture.description()
-                            + " §8(" + Math.round(gesture.spell().manaCost()) + " маны)"
-            ));
+        ctx.getSource().sendSystemMessage(Component.literal("§6Формы рисования (удерживайте ] и ведите мышь):"));
+        String[] lines = {
+                "Круг — Огненный шар", "Треугольник — Ледяной удар", "V — Исцеление",
+                "Зигзаг Z — Молния", "Спираль — Яд", "Волна — Водный поток",
+                "Линия вправо — Ветровой порыв", "Квадрат — Магический щит",
+                "Линия вниз — Метеорит", "Стягивающаяся спираль — Притяжение"
+        };
+        for (String line : lines) {
+            ctx.getSource().sendSystemMessage(Component.literal("§f" + line));
         }
         return 1;
     }

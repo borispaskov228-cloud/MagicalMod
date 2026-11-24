@@ -25,9 +25,12 @@ public abstract class ServerPlayerMixin implements ManaHolder {
 
     @Inject(method = "readAdditionalSaveData", at = @At("HEAD"))
     private void magicalmod$load(ValueInput input, CallbackInfo ci) {
-        magicalmod$mana = input.getFloatOr("magicalmod:mana", ManaHolder.BASE_MAX_MANA);
-        magicalmod$level = input.getIntOr("magicalmod:mana_level", 0);
-        magicalmod$xp = input.getIntOr("magicalmod:mana_xp", 0);
+        magicalmod$level = Math.max(0, Math.min(ManaHolder.MAX_LEVEL,
+                input.getIntOr("magicalmod:mana_level", 0)));
+        magicalmod$xp = Math.max(0, Math.min(ManaHolder.XP_PER_LEVEL - 1,
+                input.getIntOr("magicalmod:mana_xp", 0)));
+        magicalmod$mana = Math.max(0.0F, Math.min(magicalmod$getMaxMana(),
+                input.getFloatOr("magicalmod:mana", ManaHolder.BASE_MAX_MANA)));
     }
 
     @Override public float magicalmod$getMana() { return magicalmod$mana; }

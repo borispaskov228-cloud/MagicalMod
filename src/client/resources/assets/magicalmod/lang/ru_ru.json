@@ -1,6 +1,7 @@
 {
   "key.magicalmod.ritual": "Круг магии (меню)",
   "key.magicalmod.cast": "Рисование магии (удерживать)",
+  "block.magicalmod.mana_herb": "Трава маны",
   "item.magicalmod.mana_herb": "Трава маны",
   "item.magicalmod.mana_potion_small": "Малое зелье маны",
   "item.magicalmod.mana_potion_medium": "Среднее зелье маны",
@@ -8,6 +9,9 @@
   "item.magicalmod.staff_novice": "Посох новичка",
   "item.magicalmod.staff_adept": "Посох адепта",
   "item.magicalmod.staff_archmage": "Посох архимага",
+  "item.magicalmod.boss_summoner": "Призыватель Архимага",
+  "item.magicalmod.boss_core": "Ядро Архимага",
+  "entity.magicalmod.archmage_boss": "Архимаг Пустоты",
   "category.magicalmod": "MagicalMod",
   "key.category.magicalmod.category": "MagicalMod",
   "magicalmod:category": "MagicalMod"

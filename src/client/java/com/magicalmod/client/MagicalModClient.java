@@ -20,6 +20,7 @@ public class MagicalModClient implements ClientModInitializer {
         com.magicalmod.boss.BossClient.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player == null) ManaHud.reset();
             if (client.player != null) {
                 if (ModKeys.RITUAL.consumeClick()) {
                     ClientPlayNetworking.send(new RitualActionPayload("open"));

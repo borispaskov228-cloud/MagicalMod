@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import com.magicalmod.net.ModPayloads.CastFxPayload;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
@@ -22,6 +24,8 @@ public final class MagicProjectiles {
     private MagicProjectiles() {}
 
     private static final List<Bolt> BOLTS = new ArrayList<>();
+
+    public static void clear() { BOLTS.clear(); }
     private static final double SPEED = 0.9D;
 
     private static final DustParticleOptions FROST_DUST = new DustParticleOptions(0xAAEEFF, 0.9F);
@@ -55,6 +59,7 @@ public final class MagicProjectiles {
             trail(world, b);
 
             ServerPlayer caster = server.getPlayerList().getPlayer(b.caster);
+            if (caster == null || !caster.isAlive()) { it.remove(); continue; }
             boolean done = false;
 
             if (b.spell.isSelf()) {
@@ -115,6 +120,15 @@ public final class MagicProjectiles {
     private static void burst(ServerLevel world, Bolt b) {
         world.sendParticles(DUST[b.spell.ordinal()], b.pos.x, b.pos.y, b.pos.z,
                 b.empowered ? 40 : 16, 0.8, 0.8, 0.8, 0.1);
+
+        // Клиентская анимация — в момент попадания, а не в момент каста
+        CastFxPayload fx = new CastFxPayload(b.spell.id(), b.empowered,
+                b.caster.toString(), b.pos.x, b.pos.y, b.pos.z);
+        for (ServerPlayer viewer : world.getServer().getPlayerList().getPlayers()) {
+            if (viewer.level() == world && viewer.distanceToSqr(b.pos) < 1024.0D) {
+                ServerPlayNetworking.send(viewer, fx);
+            }
+        }
     }
 
     private static final class Bolt {

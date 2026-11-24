@@ -8,6 +8,7 @@ import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.ManaPotions;
+import com.magicalmod.magic.RitualActions;
 import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
 import com.magicalmod.staff.StaffContent;
@@ -38,6 +39,7 @@ public class MagicalMod implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             RitualManager.reset();
             ManaManager.resetRegenCounter();
+            MagicProjectiles.clear();
         });
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -51,7 +53,11 @@ public class MagicalMod implements ModInitializer {
             GuideBook.give(handler.getPlayer());
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            if (handler.getPlayer() != null) RitualManager.onDisconnect(handler.getPlayer());
+            if (handler.getPlayer() != null) {
+                RitualManager.onDisconnect(handler.getPlayer());
+                RitualActions.forget(handler.getPlayer().getUUID());
+                com.magicalmod.magic.SpellCaster.forget(handler.getPlayer().getUUID());
+            }
         });
 
         // При респавне сервер создаёт нового ServerPlayer — переносим ману и синхронизируем HUD
@@ -61,6 +67,7 @@ public class MagicalMod implements ModInitializer {
             to.magicalmod$setManaLevel(from.magicalmod$getManaLevel());
             to.magicalmod$setManaXp(from.magicalmod$getManaXp());
             ManaManager.setSilent(newPlayer, ManaManager.get(oldPlayer));
+            ManaManager.sendToClient(newPlayer);
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) ->
                 ManaManager.sendToClient(newPlayer)

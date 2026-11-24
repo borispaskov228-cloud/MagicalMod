@@ -15,9 +15,9 @@ public final class ModKeys {
     public static final KeyMapping.Category CATEGORY =
             KeyMapping.Category.register(MagicalMod.id("category"));
 
-    /** Меню круга. */
+    /** Меню круга. G занят ванильным Quick Actions, поэтому используем '\\'. */
     public static final KeyMapping RITUAL = KeyBindingHelper.registerKeyBinding(
-            new KeyMapping("key.magicalmod.ritual", InputConstants.KEY_G, CATEGORY));
+            new KeyMapping("key.magicalmod.ritual", InputConstants.KEY_BACKSLASH, CATEGORY));
 
     /** Каст по введённому жесту. */
     public static final KeyMapping CAST = KeyBindingHelper.registerKeyBinding(
