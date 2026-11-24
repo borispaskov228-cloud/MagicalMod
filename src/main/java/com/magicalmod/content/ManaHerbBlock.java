@@ -1,6 +1,9 @@
 package com.magicalmod.content;
 
+import com.magicalmod.MagicalMod;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -14,6 +17,8 @@ public class ManaHerbBlock extends Block {
 
     public ManaHerbBlock() {
         super(BlockBehaviour.Properties.of()
+                // В 1.21.11 у каждого блока обязан быть задан ID ещё в Properties
+                .setId(ResourceKey.create(Registries.BLOCK, MagicalMod.id("mana_herb")))
                 .noCollision()
                 .instabreak()
                 .sound(SoundType.GRASS)
