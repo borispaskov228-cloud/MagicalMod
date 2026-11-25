@@ -1,6 +1,27 @@
 {
-  "parent": "minecraft:block/cross",
+  "ambientocclusion": false,
   "textures": {
-    "cross": "magicalmod:block/mana_herb"
-  }
+    "cross": "magicalmod:block/mana_herb",
+    "particle": "magicalmod:block/mana_herb"
+  },
+  "elements": [
+    {
+      "from": [ 4, 0, 8 ],
+      "to": [ 12, 11, 8 ],
+      "shade": false,
+      "faces": {
+        "north": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" },
+        "south": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" }
+      }
+    },
+    {
+      "from": [ 8, 0, 4 ],
+      "to": [ 8, 11, 12 ],
+      "shade": false,
+      "faces": {
+        "east": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" },
+        "west": { "uv": [ 0, 0, 16, 16 ], "texture": "#cross" }
+      }
+    }
+  ]
 }
