@@ -9,6 +9,7 @@ import com.magicalmod.magic.MagicProjectiles;
 import com.magicalmod.magic.ManaHolder;
 import com.magicalmod.magic.ManaManager;
 import com.magicalmod.magic.ManaPotions;
+import com.magicalmod.magic.RecipeBookUnlocker;
 import com.magicalmod.magic.RitualActions;
 import com.magicalmod.magic.RitualManager;
 import com.magicalmod.net.ModPayloads;
@@ -53,6 +54,7 @@ public class MagicalMod implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ManaManager.sendToClient(handler.getPlayer());
             RitualManager.applyPendingRefunds(handler.getPlayer());
+            RecipeBookUnlocker.unlock(handler.getPlayer());
             GuideBook.give(handler.getPlayer());
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

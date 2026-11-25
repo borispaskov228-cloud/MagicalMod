@@ -28,10 +28,10 @@ import net.minecraft.world.item.Items;
  * это исключает повторный blur ("Can only blur once per frame").
  */
 public class GuideScreen extends Screen {
-    private static final int TITLE_H = 28;
+    private static final int TITLE_H = 24;
     /** Компактное окно гида: не закрывает весь экран. */
-    private static final int MAX_W = 800;
-    private static final int MAX_H = 560;
+    private static final int MAX_W = 680;
+    private static final int MAX_H = 460;
     private static final int MIN_CONTENT_W = 160;
 
     private static final int TEXT_COLOR = 0xFFD9D0E8;
@@ -123,17 +123,17 @@ public class GuideScreen extends Screen {
     }
 
     private void layout() {
-        int margin = 24;
-        panelW = Math.max(380, Math.min(this.width - margin * 2, MAX_W));
-        panelH = Math.max(300, Math.min(this.height - margin * 2, MAX_H));
+        int margin = 28;
+        panelW = Math.max(360, Math.min(this.width - margin * 2, MAX_W));
+        panelH = Math.max(280, Math.min(this.height - margin * 2, MAX_H));
         px = (this.width - panelW) / 2;
         py = (this.height - panelH) / 2;
 
-        tabH = 26;
-        tabGap = 4;
-        tabW = Math.max(84, Math.min(130, panelW / 5));
-        tabX = px + 12;
-        tabY = py + TITLE_H + 12;
+        tabH = 22;
+        tabGap = 3;
+        tabW = Math.max(80, Math.min(110, panelW / 5));
+        tabX = px + 10;
+        tabY = py + TITLE_H + 10;
 
         contentX = tabX + tabW + 16;
         contentY = tabY;
@@ -466,7 +466,7 @@ public class GuideScreen extends Screen {
     private static List<Entry> craftsChapter() {
         List<Entry> e = new ArrayList<>();
         e.add(Entry.title("РЕЦЕПТЫ МАГИИ"));
-        e.add(Entry.text("Все рецепты крафтятся в обычном верстаке. Слева — компоненты, справа — результат. Наведите на иконку, чтобы увидеть название."));
+        e.add(Entry.text("Все рецепты крафтятся в обычном верстаке. Слева — компоненты, справа — результат. Наведите на иконку, чтобы увидеть название. Те же рецепты сразу открыты в ванильной книге рецептов."));
 
         e.add(Entry.header("ПОСОХИ"));
         e.add(Entry.craft("Посох новичка", "+25% силы заклинаний",
