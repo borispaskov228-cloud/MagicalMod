@@ -498,7 +498,7 @@ public class GuideScreen extends Screen {
                 new ItemStack[]{new ItemStack(Items.AMETHYST_SHARD, 4), new ItemStack(Items.ECHO_SHARD, 2),
                         new ItemStack(Items.NETHERITE_INGOT, 2), new ItemStack(Items.BOOKSHELF)},
                 new ItemStack(BossContent.BOSS_SUMMONER), 0xFFB478FF));
-        e.add(Entry.hint("Трава маны растёт в дикой природе; команда /magic herb выдаёт 8 штук."));
+        e.add(Entry.hint("Трава маны растёт на траве в новых чанках, медленно расползается сама и размножается костной мукой. Команда /magic herb выдаёт 8 штук."));
         return e;
     }
 

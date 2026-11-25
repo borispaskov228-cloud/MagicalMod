@@ -2,6 +2,7 @@ package com.magicalmod;
 
 import com.magicalmod.boss.BossContent;
 import com.magicalmod.command.MagicCommands;
+import com.magicalmod.content.ManaHerbWorldGen;
 import com.magicalmod.content.ModContent;
 import com.magicalmod.magic.GuideBook;
 import com.magicalmod.magic.GuideBookHandler;
@@ -37,6 +38,7 @@ public class MagicalMod implements ModInitializer {
         GuideBookHandler.register();
         StaffContent.register();
         ModContent.register();
+        ManaHerbWorldGen.register();
         BossContent.register();
 
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
