@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:bookshelf",
+    "E": "minecraft:echo_shard",
+    "N": "minecraft:netherite_ingot"
+  },
+  "pattern": [
+    "AEA",
+    "NBN",
+    "AEA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magicalmod:boss_summoner"
+  }
+}

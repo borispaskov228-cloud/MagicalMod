@@ -492,6 +492,11 @@ public class GuideScreen extends Screen {
                         new ItemStack(Items.GLASS_BOTTLE)},
                 new ItemStack(ModContent.MANA_POTION_LARGE), 0xFF66E0A0));
 
+        e.add(Entry.header("ПРИЗЫВ БОССА"));
+        e.add(Entry.craft("Призыватель Архимага", "4 аметиста + 2 эхо-осколка + 2 незерита + книжная полка",
+                new ItemStack[]{new ItemStack(Items.AMETHYST_SHARD, 4), new ItemStack(Items.ECHO_SHARD, 2),
+                        new ItemStack(Items.NETHERITE_INGOT, 2), new ItemStack(Items.BOOKSHELF)},
+                new ItemStack(BossContent.BOSS_SUMMONER), 0xFFB478FF));
         e.add(Entry.hint("Трава маны растёт в дикой природе; команда /magic herb выдаёт 8 штук."));
         return e;
     }
