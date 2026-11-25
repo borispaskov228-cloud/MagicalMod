@@ -28,9 +28,10 @@ import net.minecraft.world.item.Items;
  * это исключает повторный blur ("Can only blur once per frame").
  */
 public class GuideScreen extends Screen {
-    private static final int TITLE_H = 32;
-    private static final int MAX_W = 1040;
-    private static final int MAX_H = 720;
+    private static final int TITLE_H = 28;
+    /** Компактное окно гида: не закрывает весь экран. */
+    private static final int MAX_W = 800;
+    private static final int MAX_H = 560;
     private static final int MIN_CONTENT_W = 160;
 
     private static final int TEXT_COLOR = 0xFFD9D0E8;
@@ -122,17 +123,17 @@ public class GuideScreen extends Screen {
     }
 
     private void layout() {
-        int margin = 14;
-        panelW = Math.max(420, Math.min(this.width - margin * 2, MAX_W));
+        int margin = 24;
+        panelW = Math.max(380, Math.min(this.width - margin * 2, MAX_W));
         panelH = Math.max(300, Math.min(this.height - margin * 2, MAX_H));
         px = (this.width - panelW) / 2;
         py = (this.height - panelH) / 2;
 
-        tabH = 30;
-        tabGap = 6;
-        tabW = Math.max(90, Math.min(168, panelW / 5));
-        tabX = px + 14;
-        tabY = py + TITLE_H + 14;
+        tabH = 26;
+        tabGap = 4;
+        tabW = Math.max(84, Math.min(130, panelW / 5));
+        tabX = px + 12;
+        tabY = py + TITLE_H + 12;
 
         contentX = tabX + tabW + 16;
         contentY = tabY;
