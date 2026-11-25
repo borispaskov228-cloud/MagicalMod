@@ -12,6 +12,9 @@ public final class RitualActions {
     public static void forget(java.util.UUID uuid) { LAST_ACTION.remove(uuid); }
 
     public static String handle(ServerPlayer player, String action) {
+        // Открытие меню не должно съедать слот лимита перед быстрым кликом по кнопке.
+        if ("open".equals(action)) return status(player);
+
         long now = System.currentTimeMillis();
         Long last = LAST_ACTION.get(player.getUUID());
         if (last != null && now - last < 200L) return "§cСлишком быстро";
@@ -83,7 +86,7 @@ public final class RitualActions {
         RitualCircle circle = RitualManager.get(player.getUUID());
         if (circle == null) return "§cУ вас нет активного круга";
         RitualManager.stop(player);
-        player.displayClientMessage(Component.literal("§eКруг расформирован, мана возвращена"), false);
+        player.displayClientMessage(Component.literal("§eКруг расформирован"), false);
         return status(player);
     }
 }

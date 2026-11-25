@@ -52,6 +52,7 @@ public class MagicalMod implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ManaManager.sendToClient(handler.getPlayer());
+            RitualManager.applyPendingRefunds(handler.getPlayer());
             GuideBook.give(handler.getPlayer());
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {

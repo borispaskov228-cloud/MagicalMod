@@ -38,7 +38,11 @@ public abstract class ServerPlayerMixin implements ManaHolder {
         magicalmod$mana = Math.max(0.0F, Math.min(magicalmod$getMaxMana(), mana));
     }
     @Override public int magicalmod$getManaLevel() { return magicalmod$level; }
-    @Override public void magicalmod$setManaLevel(int level) { magicalmod$level = level; }
+    @Override public void magicalmod$setManaLevel(int level) {
+        magicalmod$level = Math.max(0, Math.min(ManaHolder.MAX_LEVEL, level));
+    }
     @Override public int magicalmod$getManaXp() { return magicalmod$xp; }
-    @Override public void magicalmod$setManaXp(int xp) { magicalmod$xp = xp; }
+    @Override public void magicalmod$setManaXp(int xp) {
+        magicalmod$xp = Math.max(0, Math.min(ManaHolder.XP_PER_LEVEL - 1, xp));
+    }
 }

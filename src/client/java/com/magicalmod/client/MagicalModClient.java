@@ -23,7 +23,7 @@ public class MagicalModClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) ManaHud.reset();
-            if (client.player != null) {
+            if (client.player != null && client.screen == null) {
                 if (ModKeys.RITUAL.consumeClick()) {
                     ClientPlayNetworking.send(new RitualActionPayload("open"));
                 }
@@ -32,18 +32,23 @@ public class MagicalModClient implements ClientModInitializer {
             SpellAnimations.tick(client);
         });
 
-        ClientPlayNetworking.registerGlobalReceiver(RitualStatusPayload.TYPE, (payload, context) ->
-                context.client().setScreen(new RitualScreen(payload.text()))
-        );
+        ClientPlayNetworking.registerGlobalReceiver(RitualStatusPayload.TYPE, (payload, context) -> {
+            // Не вытесняем открытый инвентарь/гид; обновляем только само меню круга.
+            if (context.client().screen == null || context.client().screen instanceof RitualScreen) {
+                context.client().setScreen(new RitualScreen(payload.text()));
+            }
+        });
         ClientPlayNetworking.registerGlobalReceiver(CastFxPayload.TYPE, (payload, context) ->
                 SpellAnimations.add(payload, context.client())
         );
         ClientPlayNetworking.registerGlobalReceiver(ManaUpdatePayload.TYPE, (payload, context) ->
                 ManaHud.setMana(payload.mana(), payload.maxMana(), payload.level(), payload.xp())
         );
-        ClientPlayNetworking.registerGlobalReceiver(OpenGuidePayload.TYPE, (payload, context) ->
-                context.client().setScreen(new GuideScreen())
-        );
+        ClientPlayNetworking.registerGlobalReceiver(OpenGuidePayload.TYPE, (payload, context) -> {
+            if (context.client().screen == null || context.client().screen instanceof GuideScreen) {
+                context.client().setScreen(new GuideScreen());
+            }
+        });
 
         HudElementRegistry.addLast(com.magicalmod.MagicalMod.id("drawing_overlay"), DrawingInput::render);
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ManaHud.ID, ManaHud::render);

@@ -442,7 +442,7 @@ public class GuideScreen extends Screen {
             e.add(Entry.row(FORM_NAMES[i], all[i].displayName() + " — " + EFFECTS[i],
                     all[i].color() | 0xFF000000));
         }
-        e.add(Entry.hint("Заклинания]* летят зарядом: эффект срабатывает при попадании. Формы HEAL и SHIELD действуют на вас."));
+        e.add(Entry.hint("Заклинания летят зарядом: эффект срабатывает при попадании. Формы HEAL и SHIELD действуют на вас."));
         return e;
     }
 

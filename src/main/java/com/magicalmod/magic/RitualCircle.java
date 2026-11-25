@@ -63,6 +63,7 @@ public final class RitualCircle {
         for (Map.Entry<UUID, Float> entry : contributions.entrySet()) {
             ServerPlayer p = server.getPlayerList().getPlayer(entry.getKey());
             if (p != null) ManaManager.add(p, entry.getValue());
+            else RitualManager.deferRefund(entry.getKey(), entry.getValue());
         }
         pool = 0.0F;
         contributions.clear();

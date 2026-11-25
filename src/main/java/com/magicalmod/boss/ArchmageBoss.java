@@ -28,12 +28,14 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -53,6 +55,9 @@ public class ArchmageBoss extends Mob {
     private static final float PHASE_3_AT = 0.30F;
     private static final int TELEPORT_TICKS = 45;
     private static final int RUNE_TICKS = 55;
+    /** Босс держится в диапазоне 5–10 блоков над землёй. */
+    private static final double MIN_FLIGHT_HEIGHT = 5.0D;
+    private static final double MAX_FLIGHT_HEIGHT = 10.0D;
 
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(ArchmageBoss.class, EntityDataSerializers.INT);
@@ -72,6 +77,9 @@ public class ArchmageBoss extends Mob {
 
     public ArchmageBoss(EntityType<? extends ArchmageBoss> type, Level level) {
         super(type, level);
+        // Обычный MoveControl умеет только подниматься (через jump) — с noGravity босс
+        // залипал бы у верхней границы. FlyingMoveControl управляет Y в обе стороны.
+        this.moveControl = new FlyingMoveControl(this, 10, true);
         this.setNoGravity(true);
         this.bossBar.setProgress(1.0F);
     }
@@ -130,6 +138,7 @@ public class ArchmageBoss extends Mob {
         String msg = source.getMsgId();
         return source.is(DamageTypes.MAGIC)
                 || source.is(DamageTypes.INDIRECT_MAGIC)
+                || source.is(DamageTypes.LIGHTNING_BOLT)
                 || source.is(DamageTypes.WITHER)
                 || source.is(DamageTypes.DRAGON_BREATH)
                 || msg.contains("magic");
@@ -141,6 +150,17 @@ public class ArchmageBoss extends Mob {
         updatePhase(level);
         updateTarget(level);
         updateMovement();
+        // Жёсткий предел высоты (защита от телепортов и толчков).
+        // Не обнуляем полностью Y-скорость — FlyingMoveControl должен опускать босса.
+        Vec3 vel = this.getDeltaMovement();
+        double capped = flightY(this.getY());
+        if (this.getY() > capped + 0.05D) {
+            this.setPos(this.getX(), capped, this.getZ());
+            this.setDeltaMovement(vel.x, Math.min(vel.y, 0.0D), vel.z);
+        } else if (this.getY() < capped - 4.0D) {
+            this.setPos(this.getX(), capped, this.getZ());
+            this.setDeltaMovement(vel.x, Math.max(vel.y, 0.0D), vel.z);
+        }
         updateBossBar(level);
         updateHazards(level);
         updateMinionShield(level);
@@ -215,10 +235,23 @@ public class ArchmageBoss extends Mob {
         this.setTarget(best);
     }
 
+    /** Высота полёта: от 5 до 10 блоков над землёй под текущей позицией. */
+    private double flightY(double wanted) {
+        if (!(this.level() instanceof ServerLevel level)) return wanted;
+
+        int bx = net.minecraft.util.Mth.floor(this.getX());
+        int bz = net.minecraft.util.Mth.floor(this.getZ());
+        int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
+        double min = Math.max(level.getMinY() + 1.0D, ground + MIN_FLIGHT_HEIGHT);
+        double max = Math.min(level.getMaxY() - 2.0D, ground + MAX_FLIGHT_HEIGHT);
+        if (max < min) max = min;
+        return Math.max(min, Math.min(max, wanted));
+    }
+
     private void updateMovement() {
         LivingEntity target = this.getTarget();
         if (target == null) {
-            this.getMoveControl().setWantedPosition(this.getX(), this.getY(), this.getZ(), 0.4D);
+            this.getMoveControl().setWantedPosition(this.getX(), flightY(this.getY()), this.getZ(), 0.4D);
             return;
         }
         double dist = this.distanceTo(target);
@@ -231,6 +264,7 @@ public class ArchmageBoss extends Mob {
             x = target.getX() - to.x / dist * radius;
             z = target.getZ() - to.z / dist * radius;
         }
+        y = flightY(y);
         double speed = this.phase == 3 ? 1.15D : (this.phase == 2 ? 0.9D : 0.7D);
         this.getMoveControl().setWantedPosition(x, y, z, speed);
         if (dist < 24.0D) this.getLookControl().setLookAt(target, 30.0F, 30.0F);
@@ -432,6 +466,9 @@ public class ArchmageBoss extends Mob {
     }
 
     private void breakShield(ServerLevel level) {
+        // Антимагия не должна снимать чужие эффекты и убивать минионов,
+        // когда щита и так нет (иначе фаза 2 рушится с каждого magic-хита).
+        if (!this.shieldActive) return;
         this.removeEffect(MobEffects.RESISTANCE);
         this.removeEffect(MobEffects.ABSORPTION);
         this.shieldActive = false;

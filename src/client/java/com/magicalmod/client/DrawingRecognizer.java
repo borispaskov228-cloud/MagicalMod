@@ -103,6 +103,9 @@ public final class DrawingRecognizer {
 
         // Повороты: величина, знак (cross), суммарный и «чистый» поворот.
         TurnStats turns = analyzeTurns(sx, sy, closed);
+        // Углы считаем и по не сглаженной кривой: при быстром проведении мыши
+        // сглаживание разбивает прямой угол на два слабых поворота.
+        TurnStats rawTurns = analyzeTurns(x, y, closed);
         float absNet = Math.abs(turns.net);
 
         // Радиус относительно центроида: разброс и отношение концы/начало.
@@ -141,17 +144,19 @@ public final class DrawingRecognizer {
         if (radiusSpread > 0.32f && absNet > TWO_PI * 1.5f) {
             return !closed && radiusRatio < 0.65f ? "inward" : "spiral";
         }
-        // Стягивающаяся спираль с меньшим числом витков.
-        if (!closed && radiusSpread > 0.28f && radiusRatio < 0.62f
-                && absNet > TWO_PI * 0.9f) {
-            return "inward";
+        // Спираль в один виток: концы близки (почти замкнуто), но радиус заметно
+        // меняется — раньше такой жест ошибочно читался как круг.
+        boolean radiiChange = radiusRatio < 0.82f || radiusRatio > 1.16f;
+        if (radiiChange && radiusSpread > 0.16f && absNet > TWO_PI * 0.85f) {
+            return radiusRatio < 0.82f ? "inward" : "spiral";
         }
 
         // 2) Замкнутые и почти замкнутые фигуры: число резких углов задаёт форму.
         if ((closed || (nearlyClosed && absNet > TWO_PI * 0.8f)) && absNet > 3.5f) {
-            if (turns.sharpCount == 3) return "triangle";
-            if (turns.sharpCount == 4) return "square";
-            if (turns.sharpCount <= 2) return "circle";
+            int sharp = rawTurns.sharpCount > 0 ? rawTurns.sharpCount : turns.sharpCount;
+            if (sharp == 3 || sharp == 6) return "triangle";
+            if (sharp == 4 || sharp == 8) return "square";
+            if (sharp <= 2) return "circle";
             return "";
         }
 
@@ -161,17 +166,19 @@ public final class DrawingRecognizer {
             return "line";
         }
 
-        // 4) V: одна резкая вершина, оба конца выше неё.
-        if (turns.sharpCount == 1 && turns.sharpIndex >= 0) {
-            float vy = y[turns.sharpIndex];
-            if (y[0] < vy - 0.05f && y[n - 1] < vy - 0.05f) return "v";
+        // 4) V: одна резкая вершина — ориентация значения не имеет.
+        if (turns.sharpCount == 1 && turns.sharpIndex >= 0 && !closed) {
+            int vi = turns.sharpIndex;
+            if (distance(x[0], y[0], x[vi], y[vi]) > 0.12f
+                    && distance(x[n - 1], y[n - 1], x[vi], y[vi]) > 0.12f) return "v";
         }
 
-        // 5) Зигзаг: 2+ резких поворота на незамкнутой кривой.
-        if (!closed && turns.sharpCount >= 2) return "zigzag";
+        // 5) Волна: плавные чередующиеся повороты. Один период даёт 2 смены знака.
+        if (!closed && turns.sharpCount < 2 && turns.total > 1.2f
+                && (turns.signChanges >= 2 || radiusSpread > 0.4f)) return "wave";
 
-        // 6) Волна: 3+ чередующихся поворота разного знака.
-        if (!closed && turns.signChanges >= 3 && turns.total > 1.2f) return "wave";
+        // 6) Зигзаг: 2+ резких поворота на незамкнутой кривой.
+        if (!closed && turns.sharpCount >= 2) return "zigzag";
 
         // 7) Круг с небольшим разрывом.
         if (nearlyClosed && absNet > 4.5f && turns.sharpCount <= 2) return "circle";

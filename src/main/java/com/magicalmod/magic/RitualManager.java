@@ -17,9 +17,24 @@ public final class RitualManager {
     private RitualManager() {}
 
     private static final Map<UUID, RitualCircle> CIRCLES = new HashMap<>();
+    /** Мана участников, вышедших из сети до расформирования круга. */
+    private static final Map<UUID, Float> PENDING_REFUNDS = new HashMap<>();
     private static int tickCounter = 0;
 
-    public static void reset() { CIRCLES.clear(); tickCounter = 0; }
+    public static void reset() { CIRCLES.clear(); PENDING_REFUNDS.clear(); tickCounter = 0; }
+
+    public static void deferRefund(UUID uuid, float mana) {
+        PENDING_REFUNDS.merge(uuid, mana, Float::sum);
+    }
+
+    /** Возвращаем отложенную ману при следующем входе игрока в сеть. */
+    public static void applyPendingRefunds(ServerPlayer player) {
+        Float mana = PENDING_REFUNDS.remove(player.getUUID());
+        if (mana != null && mana > 0.0F) {
+            ManaManager.add(player, mana);
+            ManaManager.sendToClient(player);
+        }
+    }
 
     public static RitualCircle start(ServerPlayer leader) {
         RitualCircle old = CIRCLES.remove(leader.getUUID());
@@ -33,12 +48,13 @@ public final class RitualManager {
 
     public static java.util.Collection<RitualCircle> all() { return CIRCLES.values(); }
 
-    /** Убирает игрока из круга (его взнос остаётся в пуле). */
+    /** Убирает игрока из всех кругов (его взнос остаётся в пуле). */
     public static boolean leave(ServerPlayer player) {
+        boolean left = false;
         for (RitualCircle circle : CIRCLES.values()) {
-            if (circle.removeContributor(player.getUUID())) return true;
+            if (circle.removeContributor(player.getUUID())) left = true;
         }
-        return false;
+        return left;
     }
 
     public static void stop(ServerPlayer leader) {
@@ -60,8 +76,12 @@ public final class RitualManager {
         return best;
     }
 
+    /** Круг лидера, но только если он всё ещё в своём измерении и рядом с центром. */
     public static RitualCircle circleForLeader(ServerPlayer player) {
-        return CIRCLES.get(player.getUUID());
+        RitualCircle circle = CIRCLES.get(player.getUUID());
+        if (circle == null || !circle.dimension().equals(player.level().dimension())) return null;
+        if (player.distanceToSqr(circle.x(), circle.y(), circle.z()) > 32.0D * 32.0D) return null;
+        return circle;
     }
 
     /** Игрок вышел из сети — убираем его из кругов, а его круг расформировываем. */
