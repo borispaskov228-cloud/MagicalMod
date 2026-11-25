@@ -88,6 +88,8 @@ public class ArchmageBoss extends Mob {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 260.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.24D)
+                // FlyingMoveControl читает этот атрибут при каждом пилотировании
+                .add(Attributes.FLYING_SPEED, 0.7D)
                 .add(Attributes.FOLLOW_RANGE, 48.0D)
                 .add(Attributes.ATTACK_DAMAGE, 12.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.6D);
