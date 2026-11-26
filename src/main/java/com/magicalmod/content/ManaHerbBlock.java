@@ -50,11 +50,10 @@ public class ManaHerbBlock extends Block implements BonemealableBlock {
         }
     }
 
-    /** Растёт только на земле и при достаточно ярком свете. */
+    /** Растёт только на земле. Свет проверяется при размножении, не здесь. */
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return level.getBlockState(pos.below()).is(BlockTags.DIRT)
-                && level.getMaxLocalRawBrightness(pos) >= 4;
+        return level.getBlockState(pos.below()).is(BlockTags.DIRT);
     }
 
     /** Медленно расползается по траве — можно вырастить целую плантацию. */

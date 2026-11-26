@@ -1,11 +1,30 @@
 {
-  "type": "minecraft:simple_block",
+  "type": "minecraft:random_patch",
   "config": {
-    "to_place": {
-      "type": "minecraft:simple_state_provider",
-      "state": {
-        "Name": "magicalmod:mana_herb"
-      }
-    }
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "config": {
+          "to_place": {
+            "type": "minecraft:simple_state_provider",
+            "state": {
+              "Name": "magicalmod:mana_herb"
+            }
+          }
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:matching_blocks",
+            "blocks": "minecraft:air"
+          }
+        }
+      ]
+    },
+    "tries": 48,
+    "xz_spread": 5,
+    "y_spread": 2
   }
 }
