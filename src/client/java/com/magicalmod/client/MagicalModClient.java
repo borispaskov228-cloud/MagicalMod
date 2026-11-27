@@ -28,7 +28,7 @@ public class MagicalModClient implements ClientModInitializer {
                     ClientPlayNetworking.send(new RitualActionPayload("open"));
                 }
             }
-            DrawingInput.tick(client);
+            SpellWheel.tick(client);
             SpellAnimations.tick(client);
         });
 
@@ -50,7 +50,7 @@ public class MagicalModClient implements ClientModInitializer {
             }
         });
 
-        HudElementRegistry.addLast(com.magicalmod.MagicalMod.id("drawing_overlay"), DrawingInput::render);
+        HudElementRegistry.addLast(com.magicalmod.MagicalMod.id("spell_wheel"), SpellWheel::render);
         HudElementRegistry.attachElementAfter(VanillaHudElements.FOOD_BAR, ManaHud.ID, ManaHud::render);
         HudStatusBarHeightRegistry.addRight(ManaHud.ID, player -> ManaHud.isVisible() ? 10 : 0);
     }

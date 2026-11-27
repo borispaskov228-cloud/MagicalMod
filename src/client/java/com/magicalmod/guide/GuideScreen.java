@@ -410,16 +410,17 @@ public class GuideScreen extends Screen {
     private static List<Entry> startChapter() {
         List<Entry> e = new ArrayList<>();
         e.add(Entry.title("ДОБРО ПОЖАЛОВАТЬ В MAGICALMOD"));
-        e.add(Entry.text("Магия рисуется жестами мыши. Удерживайте клавишу рисования, ведите мышь и отпустите — мод распознает форму и кастует заклинание."));
+        e.add(Entry.text("Теперь магия кастуется через колесо: удерживайте ], наведите мышь на нужное заклинание и отпустите клавишу. Быстрее и точнее, чем рисование фигур."));
         e.add(Entry.header("УПРАВЛЕНИЕ"));
         e.add(Entry.key("\\", "Открыть меню круга (RitualScreen)"));
-        e.add(Entry.key("]", "Удерживать для рисования формы"));
+        e.add(Entry.key("]", "Удерживать, чтобы открыть колесо заклинаний"));
         e.add(Entry.key("G", "Конфликтует с ванильным Quick Actions — не используется"));
         e.add(Entry.key("ESC", "Закрыть этот гид"));
-        e.add(Entry.header("КАК РИСОВАТЬ"));
-        e.add(Entry.bullet("Замкнутые формы (круг, квадрат) начинайте и заканчивайте рядом."));
-        e.add(Entry.bullet("Рисуйте ровно и не слишком быстро: распознавание идёт по направлению и углам."));
-        e.add(Entry.bullet("Каст стоит маны; если её не хватит, об этом сообщат прямо в игре."));
+        e.add(Entry.header("КАК КАСТОВАТЬ"));
+        e.add(Entry.bullet("Зажмите ] — вокруг прицела появится колесо из 10 заклинаний."));
+        e.add(Entry.bullet("Ведите мышь в сторону сектора: выбранное заклинание подсвечивается."));
+        e.add(Entry.bullet("Отпустите ] — заклинание летит. В центре показаны название и цена в мане."));
+        e.add(Entry.bullet("Если маны не хватит, об этом сообщат прямо в игре."));
         e.add(Entry.header("ПОЛЕЗНЫЕ КОМАНДЫ"));
         e.add(Entry.bullet("/magic book — получить книгу-инструкцию."));
         e.add(Entry.bullet("/magic gestures — список всех десяти форм."));
@@ -431,7 +432,7 @@ public class GuideScreen extends Screen {
     private static List<Entry> formsChapter() {
         List<Entry> e = new ArrayList<>();
         e.add(Entry.title("ФОРМЫ И ЗАКЛИНАНИЯ"));
-        e.add(Entry.text("Удерживайте ] и нарисуйте одну из десяти форм. Цвет строки соответствует цвету заклинания."));
+        e.add(Entry.text("Зажмите ] и наведите мышь на сектор колеса. Цвет строки соответствует цвету заклинания, номер в секторе — его порядку."));
         e.add(Entry.header("ОСНОВНЫЕ ФОРМЫ"));
         Spell[] all = Spell.values();
         for (int i = 0; i < 5; i++) {
